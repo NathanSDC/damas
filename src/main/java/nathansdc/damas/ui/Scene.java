@@ -6,36 +6,20 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.io.File;
-
 import javax.swing.JPanel;
 
 import main.java.nathansdc.damas.App;
 import main.java.nathansdc.damas.jogo.Board;
 import main.java.nathansdc.damas.jogo.Board.PieceType;
+import main.java.nathansdc.damas.util.FontLoader;
 
 public class Scene extends JPanel {
 
     private static Board startBoard = App.board;
 
-    private Font audiowide20;
-    private Font audiowide30;
-    private Font audiowide45;
-    {
-        try {
-            File fontStream = new File(
-                    App.class.getClassLoader().getResource("main/resources/Audiowide/Audiowide.ttf").getFile());
-            audiowide20 = Font.createFont(Font.TRUETYPE_FONT, fontStream);
-
-            // Pré derivações da fonte
-            audiowide20 = audiowide20.deriveFont(20.0f);
-            audiowide30 = audiowide20.deriveFont(30.0f);
-            audiowide45 = audiowide20.deriveFont(45.0f);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-    }
+    private Font audiowide20 = FontLoader.getFont("Audiowide").deriveFont(20.0f);
+    private Font audiowide30 = audiowide20.deriveFont(30.0f);
+    private Font audiowide45 = audiowide20.deriveFont(45.0f);
 
     /**
      * <pre>

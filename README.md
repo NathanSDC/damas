@@ -1,4 +1,5 @@
-# Damas
+## Damas by NathanSDC
+![##Damas](images/print.png)
 
 Um jogo de damas simples, atualmente com dois modos de jogo e regras básicas de movimentação e captura.
 
