@@ -61,7 +61,7 @@ public class App implements Runnable {
     public static int windowHeight = Board.size * squareSize + offsetY;
 
     private static Random random = new Random();
-    private static Timer t = new Timer(random.nextInt(1500) + 500, (a) -> {
+    private static Timer t = new Timer(random.nextInt(1000) + 500, (a) -> {
         App.ai.execute(App.ai.choseMovement(App.board));
     });
     public static void update() {
@@ -85,9 +85,9 @@ public class App implements Runnable {
             scene.update();
 
             if (App.playingAgainstAI && App.board.currentTurn == 2 && !App.playerWon) {
-                // t.setRepeats(false);
+                t.setRepeats(false);
                 t.start();
-                t.setDelay(random.nextInt(250));// (0 ~ 1000) + (500)
+                t.setDelay(random.nextInt(1000) + 500);// (0 ~ 1000) + (500)
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -129,7 +129,7 @@ public class App implements Runnable {
 
         if (desktop.isSupported(Desktop.Action.BROWSE)) {
             try {
-                desktop.browse(new URI("https://github.com/nathansdc/"));
+                desktop.browse(new URI("https://github.com/nathansdc/damas"));
             } catch (Exception e) {
                 // TODO: Adicionar janela de erro para o usuario
                 e.printStackTrace();
