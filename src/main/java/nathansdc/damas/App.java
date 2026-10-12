@@ -30,8 +30,8 @@ public class App implements Runnable {
     public static boolean player1Won = false;
     public static boolean player2Won = false;
 
-    public int player1score = 0;
-    public int player2score = 0;
+    public static boolean isPlayer1OutOfMoves = false;
+    public static boolean isPlayer2OutOfMoves = false;
 
     /**
      * <pre>
@@ -62,19 +62,31 @@ public class App implements Runnable {
 
     private static Random random = new Random();
     private static Timer t = new Timer(random.nextInt(1000) + 500, (a) -> {
-        App.ai.execute(App.ai.choseMovement(App.board));
+        // Caso o jogador pause o jogo logo após fazer uma jogada, o algoritimo não
+        // executará sua jogada até que o jogo tenha sido despausado.
+        if(App.isGameActive)
+            App.ai.execute(App.ai.choseMovement(App.board));
     });
+
     public static void update() {
         try {
-            if ((board.getPlayer1PieceCount() == 0 || board.getPlayer2PieceCount() == 0) && !playerWon) {
+            // Verifica se um dos jogadores está atualmente sem movimentos possiveis
+            if (board.currentTurn == 1) {
+                isPlayer1OutOfMoves = board.getPlayablePieces().size() == 0;
+            } else {
+                isPlayer2OutOfMoves = board.getPlayablePieces().size() == 0;
+            }
+
+            if (((board.getPlayer1PieceCount() == 0 || board.getPlayer2PieceCount() == 0 || isPlayer1OutOfMoves
+                    || isPlayer2OutOfMoves)) && !playerWon) {
                 t.stop();
-                
-                if (board.getPlayer1PieceCount() == 0) {
+
+                if (board.getPlayer1PieceCount() == 0 || isPlayer1OutOfMoves) {
                     player2Won = true;
-                } else if (board.getPlayer2PieceCount() == 0) {
+                } else if (board.getPlayer2PieceCount() == 0 || isPlayer2OutOfMoves) {
                     player1Won = true;
                 }
-                
+
                 isMenuActive = false;
                 isGameActive = false;
                 playerWon = true;
@@ -84,14 +96,33 @@ public class App implements Runnable {
             pieceSize = (int) (squareSize * 0.8);
             scene.update();
 
-            if (App.playingAgainstAI && App.board.currentTurn == 2 && !App.playerWon) {
+            // Se ativo notifica a IA de que pode fazer sua jogada
+            if (playingAgainstAI && board.currentTurn == 2 && !playerWon && !isPlayer2OutOfMoves) {
                 t.setRepeats(false);
                 t.start();
-                t.setDelay(random.nextInt(1000) + 500);// (0 ~ 1000) + (500)
+                // Para maior sensação de realismo e fuildez das jogadas adiciona uma tempo de espera
+                // aleatório entre uma jogada e outra
+                t.setDelay(random.nextInt(1000) + 500);// 0.5s ~ 1.5s de espera entre jogadas
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void startNewGame() {
+        board.resetBoard();
+        scene.clearAuxBoard();
+        isGameActive = true;
+        alreadyStartedAGame = true;
+        playerWon = false;
+        player1Won = false;
+        player2Won = false;
+        isPlayer1OutOfMoves = false;
+        isPlayer2OutOfMoves = false;
+        isMenuActive = false;
+        isPlayerWonDialogueActive = false;
+        isPlayModeChangeConfirmationDialogueActive = false;
+        isRedirectConfirmationDialogueActive = false;
     }
 
     public static void main(String[] args) throws Exception {

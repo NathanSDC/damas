@@ -203,7 +203,6 @@ public class Board {
     }
 
     public boolean movePiece(int sourceX, int sourceY, int targetX, int targetY) {
-        // 1. Validações Iniciais de Limites e Destino
         if (isOutOfBounds(sourceX, sourceY) || isOutOfBounds(targetX, targetY)) {
             return false;
         }
@@ -227,8 +226,7 @@ public class Board {
         int diffLinha = targetX - sourceX;
         int diffColuna = targetY - sourceY;
 
-        // Movimentos válidos precisam ser perfeitamente diagonais (passo de linha igual
-        // ao de coluna)
+        // Movimentos válidos precisam ser perfeitamente diagonais (passo de linha igual ao de coluna)
         if (Math.abs(diffLinha) != Math.abs(diffColuna)) {
             return false;
         }
@@ -237,14 +235,11 @@ public class Board {
         int dy = diffColuna > 0 ? 1 : -1;
         boolean isKing = (piece == PieceType.PLAYER1_KING || piece == PieceType.PLAYER2_KING);
 
-        // 3. Execução da Lógica Baseada no Tipo de Peça
         if (isKing) {
-            // Valida o caminho inteiro usando a lógica do mostrarMovimentosPossiveis
             if (!validarCaminhoDama(sourceX, sourceY, targetX, targetY, dx, dy)) {
                 return false;
             }
 
-            // Executa a ação da Dama
             kingsCaptureMove(sourceX, sourceY, targetX, targetY, dx, dy);
             board[targetX][targetY] = piece;
             board[sourceX][sourceY] = PieceType.EMPTY;
@@ -252,12 +247,11 @@ public class Board {
             return true;
 
         } else {
-            // --- LÓGICA DA PEÇA COMUM CORRIGIDA ---
             int allowedDirection = (currentTurn == 1) ? -1 : 1;
             int distAbsX = Math.abs(diffLinha); // Mantém o sinal para validar "para frente"
             int distAbsY = Math.abs(diffColuna); // Sempre positivo para aceitar esquerda OU direita
 
-            // 1. Movimento Simples (1 casa para frente, 1 casa para esquerda OU direita)
+            // Movimento Simples (1 casa para frente, 1 casa para esquerda OU direita)
             if (distAbsX == 1 && distAbsY == 1 && diffColuna == allowedDirection) {
                 simpleMove(sourceX, sourceY, targetX, targetY);
 
@@ -270,11 +264,9 @@ public class Board {
                 return true;
             }
 
-            // 2. Movimento de Captura (2 casas para frente, 2 casas para esquerda OU
-            // direita)
+            // Movimento de Captura (2 casas para frente, 2 casas para esquerda OU direita)
             if (diffColuna == (2 * allowedDirection) && distAbsX == 2 && distAbsY == 2) {
-                // sourceY + dy calcula o lado correto (esquerda/direita) que o jogador
-                // escolheu
+                // sourceY + dy calcula o lado correto (esquerda/direita) que o jogador  escolheu
                 int lC = sourceX + dx;
                 int cC = sourceY + dy;
 
@@ -299,6 +291,22 @@ public class Board {
         return false;
     }
 
+    /**
+     * Retorna uma matriz contendo sinalizadores indicando os tipos de movimentos
+     *  possiveis disponíveis para a peça localizada nas coordenadas ({@code x}, {@code y}).
+     * 
+     * <br>
+     * <h4>Sinalizadores:</h4>
+     * <pre>
+     *      0 - impossível alcançar
+     *      1 - casa livre para a qual pode se mover
+     *      2 - peça inimiga marcada para possivel captura
+     *      3 - peça atualmente selecionada
+     * </pre>
+     * 
+     * @param x posição {@code x} da peça no tabuleiro
+     * @param y posição {@code y} da peça no tabuleiro
+    */
     public Integer[][] showavailableMovements(int x, int y) {
         Integer[][] availableMovements = new Integer[size][size];
 
@@ -308,15 +316,12 @@ public class Board {
             }
         }
 
-        // 1. Validação básica de limites
         if (isOutOfBounds(x, y)) {
             return availableMovements;
         }
 
         PieceType piece = board[x][y];
 
-        // 2. Valida se a peça pertence ao jogador do turno currentPiece (Peça comum ou
-        // Dama)
         boolean currentPlayerPiece = false;
         if (currentTurn == 1 && piece.getCode() == 1) {
             currentPlayerPiece = true;
@@ -332,7 +337,7 @@ public class Board {
         PieceType enemyPiece = (currentTurn == 1) ? PieceType.PLAYER2 : PieceType.PLAYER1;
         PieceType enemyKing = (currentTurn == 1) ? PieceType.PLAYER2_KING : PieceType.PLAYER1_KING;
 
-        // As 4 direções diagonais possíveis (Linha, Coluna)
+        // As 4 direções diagonais possíveis (X, Y)
         int[][] directions = { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
 
         for (int[] dir : directions) {
@@ -343,13 +348,11 @@ public class Board {
             // seja captura, mas no board clássico a peça comum só captura para frente)
             int allowedDirection = (currentTurn == 1) ? -1 : 1;
             if (!isKing && dy != allowedDirection) {
-                // Nota: Se na sua regra a peça comum puder capturar para trás, remova este
-                // 'continue' e trate abaixo.
+                // TODO: Adicionar opção de captura para trás nas configurações
                 continue;
             }
 
             if (isKing) {
-                // --- LÓGICA DA DAMA (Pode andar múltiplas casas em qualquer diagonal) ---
                 int step = 1;
                 boolean enemyOnWay = false;
                 int enemyX = -1, enemyY = -1;
@@ -369,30 +372,22 @@ public class Board {
                             availableMovements[nx][ny] = 1;
                             availableMovements[x][y] = 3;
                         } else if (current == enemyPiece || current == enemyKing) {
-                            // Encontrou um inimigo, vamos ver se pode saltar
+                            // Encontrou um inimigo
                             enemyOnWay = true;
                             enemyX = nx;
                             enemyY = ny;
-                        } else {
-                            // Encontrou peça própria bloqueando a diagonal
-                            break;
-                        }
-                    } else {
-                        // Se já encontramos um inimigo, as próximas casas vazias são opções de pouso da
-                        // captura
-                        if (current == PieceType.EMPTY) {
                             availableMovements[enemyX][enemyY] = 2;
+                        } else break; // Encontrou peça própria bloqueando a diagonal
+                    } else {
+                        // Se já encontramos um inimigo, as próximas casas vazias são opções de pouso da captura
+                        if (current == PieceType.EMPTY) {
                             availableMovements[nx][ny] = 1;
                             availableMovements[x][y] = 3;
-                        } else {
-                            // Outra peça (amiga ou inimiga) bloqueando o pouso do salto
-                            break;
-                        }
+                        } else break; // Outra peça (amiga ou inimiga) bloqueando o pouso do salto
                     }
                     step++;
                 }
             } else {
-                // --- LÓGICA DA PEÇA COMUM (Mantida e isolada) ---
                 // Movimento Simples
                 int dxSimplified = x + dx;
                 int dySimplified = y + dy;
@@ -423,18 +418,56 @@ public class Board {
         return availableMovements;
     }
 
+    /**
+     * 
+     * Retorna uma lista contendo todos os movimentos disponíveis para o jogador do turno atual
+     * 
+     * @return {@link java.util.List List}<{@link main.java.nathansdc.damas.ia.Movement Movement}>
+    */
     public List<Movement> getPlayablePieces() {
         List<Movement> movements = new ArrayList<>();
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                if (isPieceOf(i, j)) {
-                    List<Movement> a = Movement.getMovements(i, j);
-                    
-                    movements.addAll(a);
+        
+        // Trata da IndexOuOfBoundsException lançada pelo {@code getMovements()}
+        try {
+            for (int i = 0; i < board.length; i++){
+                for (int j = 0; j < board.length; j++) {
+                    if (isPieceOf(i, j)){
+                        movements.addAll(Movement.getMovements(i, j));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return movements;
+    }
+
+    public PieceType[][] simuleNextState(PieceType[][] currentState, Movement movement) {
+        if (currentState == null) {
+            return  null;
+        }
+
+        if (movement == null) {
+            return currentState;
+        }
+
+        PieceType[][] nextState = new PieceType[currentState.length][currentState.length];
+
+        for (int i = 0; i < currentState.length; i++) {
+            for (int j = 0; j < currentState.length; j++) {
+                nextState[i][j] = nextState[i][j];
+
+                if (i == movement.getSourceX() && j == movement.getSourceY()) {
+                    nextState[i][j] = PieceType.EMPTY;
+                } else if (i == movement.getTargetX() && j == movement.getTargetY()) {
+                    nextState[i][j] = currentState[movement.getSourceX()][movement.getSourceY()];
+                } else if (movement.isCapture() && (i == movement.getCapturedEnemyX() && movement.getCapturedEnemyY() == j)) {
+                    nextState[i][j] = PieceType.EMPTY;
                 }
             }
         }
-        
-        return movements;
+
+        return nextState;
     }
 }

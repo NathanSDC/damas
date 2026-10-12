@@ -158,7 +158,7 @@ public class MouseHandler implements MouseListener {
         clickX = (int) (Math.ceil(e.getX() / a)) - 1;
         clickY = (int) (Math.ceil((e.getY() - (App.offsetY - App.offsetX)) / a)) - 1;
 
-        if ((App.isGameActive && !App.playerWon) && (clickY < 9 && clickY >= 0)
+        if ((App.isGameActive && !App.playerWon) && !App.board.isOutOfBounds(clickX, clickY)
                 && ((App.playingAgainstAI && App.board.currentTurn == 1) || !App.playingAgainstAI)) {
             if (!App.board.isEmptyTarget(clickX, clickY)) {
                 if (!hasSelectedPiece) {
@@ -217,14 +217,7 @@ public class MouseHandler implements MouseListener {
                 GhostButton p = (GhostButton) parent;
                 switch (p.getT()) {
                     case NEW:
-                        App.board.resetBoard();
-                        App.scene.clearAuxBoard();
-                        App.isGameActive = true;
-                        App.alreadyStartedAGame = true;
-                        App.playerWon = false;
-                        App.player1Won = false;
-                        App.player2Won = false;
-                        App.isMenuActive = false;
+                        App.startNewGame();
                         break;
                     case CONTINUE:
                         App.isGameActive = true;
@@ -268,15 +261,7 @@ public class MouseHandler implements MouseListener {
                         App.isRedirectConfirmationDialogueActive = false;
                         break;
                     case PLAYER_WON_NEW_GAME:
-                        App.board.resetBoard();
-                        App.scene.clearAuxBoard();
-                        App.isGameActive = true;
-                        App.alreadyStartedAGame = true;
-                        App.playerWon = false;
-                        App.player1Won = false;
-                        App.player2Won = false;
-                        App.isMenuActive = false;
-                        App.isPlayerWonDialogueActive = false;
+                        App.startNewGame();
                         break;
                     case PLAYER_WON_EXIT:
                         System.exit(0);

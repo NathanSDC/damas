@@ -9,7 +9,7 @@ import main.java.nathansdc.damas.jogo.Board;
 public class AI {
     
     private Random random = new Random();
-    private double mistakeChance = 0.5;
+    private double mistakeChance = 0.3;
     
     public Movement choseMovement(Board board) {
         List<Movement> playablePieces = board.getPlayablePieces();
