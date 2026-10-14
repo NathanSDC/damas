@@ -9,17 +9,15 @@ import java.awt.RenderingHints;
 import javax.swing.JPanel;
 
 import main.java.nathansdc.damas.App;
-import main.java.nathansdc.damas.jogo.Board;
-import main.java.nathansdc.damas.jogo.Board.PieceType;
+import main.java.nathansdc.damas.jogo.BoardManager;
+import main.java.nathansdc.damas.jogo.Piece;
 import main.java.nathansdc.damas.util.FontLoader;
 
 public class Scene extends JPanel {
 
-    private static Board startBoard = App.board;
+    private static BoardManager startBoard = App.boardManager;
 
-    private Font audiowide20 = FontLoader.getFont("Audiowide").deriveFont(20.0f);
-    private Font audiowide30 = audiowide20.deriveFont(30.0f);
-    private Font audiowide45 = audiowide20.deriveFont(45.0f);
+    private Font audiowide = FontLoader.getFont("Audiowide").deriveFont(20.0f);
 
     /**
      * <pre>
@@ -29,7 +27,7 @@ public class Scene extends JPanel {
      * 3 - peça atualmente selecionada
      * </pre>
      */
-    public Integer[][] auxBoard = new Integer[Board.size][Board.size];
+    public Integer[][] auxBoard = new Integer[BoardManager.size][BoardManager.size];
 
     public void clearAuxBoard() {
         for (int i = 0; i < auxBoard.length; i++) {
@@ -45,61 +43,81 @@ public class Scene extends JPanel {
 
     private boolean hasAlreadyAddMenuButtons = false;
 
-    public boolean nb = false, cb = false, lb = false, eb = false, ab = false;
-    private GhostButton newButton = new GhostButton();
-    private GhostButton conButton = new GhostButton();
-    private GhostButton lnkButton = new GhostButton();
-    private GhostButton extButton = new GhostButton();
-    private GhostButton paiButton = new GhostButton();
-    {
-
-        conButton.setT(GhostButton.type.CONTINUE);
-        newButton.setT(GhostButton.type.NEW);
-        paiButton.setT(GhostButton.type.PLAY_AGAINST_AI_MODE);
-        lnkButton.setT(GhostButton.type.LINK);
-        extButton.setT(GhostButton.type.EXIT);
-    }
+    private InvisibleButton newButton = new InvisibleButton(() -> {
+        App.startNewGame();
+    });
+    private InvisibleButton conButton = new InvisibleButton(() -> {
+        App.isGameActive = true;
+        App.alreadyStartedAGame = true;
+        App.isMenuActive = false;
+    });
+    private InvisibleButton lnkButton = new InvisibleButton(() -> {
+        App.isRedirectConfirmationDialogueActive = true;
+    });
+    private InvisibleButton extButton = new InvisibleButton(() -> {
+        System.exit(0);
+    });
+    private InvisibleButton paiButton = new InvisibleButton(() -> {
+        if (App.alreadyStartedAGame && !App.playerWon) {
+            App.isPlayModeChangeConfirmationDialogueActive = true;
+        } else {
+            App.playingAgainstAI = !App.playingAgainstAI;
+        }
+    });
 
     /**
      * has Already Added Play Mode Change Confirmation Buttons
      */
     private boolean hasAAPMCCButtons = false;
 
-    public boolean acb = false, db = false;
-    private GhostButton acceptButton = new GhostButton();
-    private GhostButton declineButton = new GhostButton();
-    {
-        acceptButton.setT(GhostButton.type.ACCEPT_PLAY_MODE_CHANGE);
-        declineButton.setT(GhostButton.type.DECLINE_PLAY_MODE_CHANGE);
-    }
+    private InvisibleButton acceptButton = new InvisibleButton(() -> {
+        App.boardManager.reset();
+        App.scene.clearAuxBoard();
+        App.isGameActive = true;
+        App.alreadyStartedAGame = true;
+        App.playerWon = false;
+        App.player1Won = false;
+        App.player2Won = false;
+        App.isMenuActive = false;
+        App.isPlayModeChangeConfirmationDialogueActive = false;
+
+        App.playingAgainstAI = !App.playingAgainstAI;
+    });
+    private InvisibleButton declineButton = new InvisibleButton(() -> {
+        App.isPlayModeChangeConfirmationDialogueActive = false;
+    });
 
     /**
      * has Already Added Redirect Confirmation Buttons
      */
     private boolean hasAARCButtons = false;
 
-    public boolean arb = false, drb = false;
-    private GhostButton acceptRedButton = new GhostButton();
-    private GhostButton declineRedButton = new GhostButton();
-    {
-        acceptRedButton.setT(GhostButton.type.ACCEPT_REDIRECT);
-        declineRedButton.setT(GhostButton.type.DECLINE_REDIRECT);
-    }
+    private InvisibleButton acceptRedButton = new InvisibleButton(() -> {
+        App.openBrowserLink();
+        App.isRedirectConfirmationDialogueActive = false;
+    });
+    private InvisibleButton declineRedButton = new InvisibleButton(() -> {
+        App.isRedirectConfirmationDialogueActive = false;
+    });
 
     /**
      * has already added player won buttons
      */
     private boolean hasAAPWButtons = false;
-
-    public boolean pnb = false, peb = false, pmb = false;
-    private GhostButton wonNewButton = new GhostButton();
-    private GhostButton wonExtButton = new GhostButton();
-    private GhostButton wonMenButton = new GhostButton();
-    {
-        wonNewButton.setT(GhostButton.type.PLAYER_WON_NEW_GAME);
-        wonExtButton.setT(GhostButton.type.PLAYER_WON_EXIT);
-        wonMenButton.setT(GhostButton.type.PLAYER_WON_MENU);
-    }
+    private InvisibleButton wonNewButton = new InvisibleButton(() -> {
+        App.startNewGame();
+    });
+    private InvisibleButton wonExtButton = new InvisibleButton(() -> {
+        System.exit(0);
+    });
+    private InvisibleButton wonMenButton = new InvisibleButton(() -> {
+        App.isGameActive = false;
+        App.isMenuActive = true;
+        App.playerWon = true;
+        App.player1Won = false;
+        App.player2Won = false;
+        App.isPlayerWonDialogueActive = false;
+    });
 
     public Scene() {
     }
@@ -112,11 +130,11 @@ public class Scene extends JPanel {
         // Garante que as boradas dos circulos e linhas sejam suaves
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         // Fonte padrão do programa
-        g2d.setFont(audiowide20);
+        g2d.setFont(audiowide);
 
         // Desenha o fundo
-        for (int i = 0; i < Board.size; i++) {
-            for (int j = 0; j < Board.size; j++) {
+        for (int i = 0; i < BoardManager.size; i++) {
+            for (int j = 0; j < BoardManager.size; j++) {
                 if (auxBoard[i][j] == 1) { // Pode se mover para >
                     g.setColor(Color.decode("#699279"));
                 } else if (auxBoard[i][j] == 2) { // Peça inimiga marcada como possivel captura
@@ -135,9 +153,9 @@ public class Scene extends JPanel {
         }
 
         // Desenha as peças no tabuleiro
-        for (int i = 0; i < Board.size; i++) {
-            for (int j = 0; j < Board.size; j++) {
-                drawPieceAt(g2d, i, j, startBoard.getPieceAt(i, j));
+        for (int i = 0; i < BoardManager.size; i++) {
+            for (int j = 0; j < BoardManager.size; j++) {
+                drawPieceAt(g2d, i, j, startBoard.getBoard().getPiece(i, j));
             }
         }
 
@@ -148,9 +166,11 @@ public class Scene extends JPanel {
 
             // TOD O: Debug Active
             // System.out.println("isMenuActive: " + App.isMenuActive
-            //         + ";\nisPlayModeChangeConfirmationDialogueActive: " + App.isPlayModeChangeConfirmationDialogueActive
-            //         + ";\nisRedirectConsfirmationDialogueActive: " + App.isRedirectConfirmationDialogueActive
-            //         + ";\nisPlayerWonDialogueActive: " + App.isPlayerWonDialogueActive);
+            // + ";\nisPlayModeChangeConfirmationDialogueActive: " +
+            // App.isPlayModeChangeConfirmationDialogueActive
+            // + ";\nisRedirectConsfirmationDialogueActive: " +
+            // App.isRedirectConfirmationDialogueActive
+            // + ";\nisPlayerWonDialogueActive: " + App.isPlayerWonDialogueActive);
 
             if (App.isMenuActive && !App.isPlayModeChangeConfirmationDialogueActive
                     && !App.isRedirectConfirmationDialogueActive && !App.isPlayerWonDialogueActive) {
@@ -286,7 +306,7 @@ public class Scene extends JPanel {
         // Reajuste de tamnho da fonte para o titulo
 
         g2d.setColor(Color.BLACK);
-        g2d.setFont(audiowide45);
+        g2d.setFont(audiowide.deriveFont(45f));
 
         if (!App.alreadyStartedAGame || App.playerWon) {
             int titleW = g2d.getFontMetrics().stringWidth(App.appTitle);
@@ -306,7 +326,7 @@ public class Scene extends JPanel {
         String[] ghostButtonStrings = new String[] { "Novo Jogo", (App.windowWidth + "x" + App.windowHeight),
                 "Github", "Sair" };
 
-        g2d.setFont(audiowide30);
+        g2d.setFont(audiowide.deriveFont(30f));
         for (int i = 0; i < ghostButtonStrings.length; i++) {
 
             if (i == 0) {
@@ -335,7 +355,7 @@ public class Scene extends JPanel {
 
             int baseHeight = ((menuY + 175) + (i * (ghostButtonHeight + pad)));
 
-            if (((cb || nb) && i == 0) || (ab && i == 1) || (lb && i == 2) || (eb && i == 3)) {
+            if (((conButton.onHover || newButton.onHover) && i == 0) || (paiButton.onHover && i == 1) || (lnkButton.onHover && i == 2) || (extButton.onHover && i == 3)) {
                 g2d.setColor(Color.decode("#c08b60"));
                 drawHoverButton(g2d, ghostButtonStrings[i], ghostButtonX, baseHeight, ghostButtonWidth,
                         ghostButtonHeight);
@@ -408,7 +428,7 @@ public class Scene extends JPanel {
         g.fillRect(menuX, menuY, menuW, menuH);
 
         g.setColor(Color.BLACK);
-        g.setFont(audiowide20);
+        g.setFont(audiowide.deriveFont(20f));
 
         String ask = "Ao trocar o modo de jogo, a partida";
         String ask2 = "atual será resetada! Prosseguir?";
@@ -422,7 +442,7 @@ public class Scene extends JPanel {
         int acceptX = menuX + 30;
         int acceptY = (menuY + menuH - 30) - 65;
 
-        if (acb) {
+        if (acceptButton.onHover) {
             g.setColor(Color.decode("#c08b60"));
             drawButton(g, "Sim", acceptX, acceptY, w, h);
         } else {
@@ -435,7 +455,7 @@ public class Scene extends JPanel {
         int declineX = (menuX + menuW - 30) - w;
         int declineY = (menuY + menuH - 30) - h;
 
-        if (db) {
+        if (declineButton.onHover) {
             g.setColor(Color.decode("#c08b60"));
             drawButton(g, "Não", declineX, declineY, w, h);
         } else {
@@ -464,7 +484,7 @@ public class Scene extends JPanel {
         g.fillRect(menuX, menuY, menuW, menuH);
 
         g.setColor(Color.BLACK);
-        g.setFont(audiowide20);
+        g.setFont(audiowide.deriveFont(20f));
 
         String ask = "Você será redirecionado para um site";
         String ask2 = "externo! Deseja prosseguir?";
@@ -478,7 +498,7 @@ public class Scene extends JPanel {
         int acceptX = menuX + 30;
         int acceptY = (menuY + menuH - 30) - 65;
 
-        if (arb) {
+        if (acceptRedButton.onHover) {
             g.setColor(Color.decode("#c08b60"));
             drawButton(g, "Sim", acceptX, acceptY, w, h);
         } else {
@@ -491,7 +511,7 @@ public class Scene extends JPanel {
         int declineX = (menuX + menuW - 30) - w;
         int declineY = (menuY + menuH - 30) - h;
 
-        if (drb) {
+        if (declineRedButton.onHover) {
             g.setColor(Color.decode("#c08b60"));
             drawButton(g, "Não", declineX, declineY, w, h);
         } else {
@@ -520,7 +540,7 @@ public class Scene extends JPanel {
         g.fillRect(menuX, menuY, menuW, menuH);
 
         g.setColor(Color.BLACK);
-        g.setFont(audiowide20);
+        g.setFont(audiowide.deriveFont(20f));
 
         String ask = "";
         if (App.playingAgainstAI) {
@@ -541,14 +561,13 @@ public class Scene extends JPanel {
         String ask2 = "Deseja iniciar novo jogo?";
         g.drawString(ask2, menuX + ((menuW - g.getFontMetrics().stringWidth(ask2)) / 2), menuY + 65);
 
-
         int w = (menuW - 80) / 3;
         int h = 65;
 
         int acceptX = menuX + 30;
         int acceptY = (menuY + menuH - 30) - h;
 
-        if (pnb) {
+        if (wonNewButton.onHover) {
             g.setColor(Color.decode("#c08b60"));
             drawButton(g, "Sim", acceptX, acceptY, w, h);
         } else {
@@ -558,10 +577,10 @@ public class Scene extends JPanel {
 
         wonNewButton.setBounds(acceptX, acceptY, w, h);
 
-        int menuButtonX = (menuX + (menuW/2)) - (w / 2);
+        int menuButtonX = (menuX + (menuW / 2)) - (w / 2);
         int menuButtonY = (menuY + menuH - 30) - h;
 
-        if (pmb) {
+        if (wonMenButton.onHover) {
             g.setColor(Color.decode("#c08b60"));
             drawButton(g, "Menu", menuButtonX, menuButtonY, w, h);
         } else {
@@ -574,7 +593,7 @@ public class Scene extends JPanel {
         int declineX = (menuX + menuW - 30) - w;
         int declineY = (menuY + menuH - 30) - h;
 
-        if (peb) {
+        if (wonExtButton.onHover) {
             g.setColor(Color.decode("#c08b60"));
             drawButton(g, "Sair", declineX, declineY, w, h);
         } else {
@@ -612,7 +631,7 @@ public class Scene extends JPanel {
         g.drawString(text, x + (w / 2) - (gbsW / 2), y + (int) (h / 1.5));
     }
 
-    private void drawPieceAt(Graphics2D g, int x, int y, PieceType piece) {
+    private void drawPieceAt(Graphics2D g, int x, int y, Piece piece) {
         switch (piece) {
             case PLAYER1:
                 g.setColor(Color.decode("#412b17"));
@@ -655,7 +674,7 @@ public class Scene extends JPanel {
 
     public void update() {
         if (App.isGameActive)
-            startBoard = App.board;
+            startBoard = App.boardManager;
         repaint();
     }
 

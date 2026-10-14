@@ -8,82 +8,91 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import main.java.nathansdc.damas.ia.AI;
-import main.java.nathansdc.damas.jogo.Board;
+import main.java.nathansdc.damas.jogo.BoardManager;
+import main.java.nathansdc.damas.jogo.Piece;
+import main.java.nathansdc.damas.ui.InterfaceMetrics;
 import main.java.nathansdc.damas.ui.Scene;
 import main.java.nathansdc.damas.ui.Window;
+import main.java.nathansdc.damas.util.ExecutionListener;
 
 public class App implements Runnable {
 
+    
     public static boolean running = true;
     public static boolean isGameActive = false;
     public static boolean alreadyStartedAGame = false;
-
-    // misc booleans
+    
+    // menu booleans
     public static boolean isMenuActive = true;
     public static boolean isPlayModeChangeConfirmationDialogueActive = false;
     public static boolean isRedirectConfirmationDialogueActive = false;
     public static boolean isPlayerWonDialogueActive = false;
-
+    
     public static AI ai = new AI();
 
+    // player won tests
     public static boolean playerWon = false;
     public static boolean player1Won = false;
     public static boolean player2Won = false;
-
+    
     public static boolean isPlayer1OutOfMoves = false;
     public static boolean isPlayer2OutOfMoves = false;
-
+    
     /**
      * <pre>
      * false = player/player
      * true = player/ai
-     */
+    */
     public static boolean playingAgainstAI = false;
-
+   
     public static int offsetX = 15;
-    public static int offsetXL = 15;
     public static int offsetY = 39;
 
     public static String appTitle = "Damas";
 
     public static int squareSize = 100;
 
+    public static InterfaceMetrics getMetrics() {
+        return InterfaceMetrics.getInstance();
+    }
+    
     /**
      * PieceSize é uma constante relativa ao valor de SquareSize e possui sempre 80%
      * do valor total do mesmo
-     */
-    public static int pieceSize = (int) (squareSize * 0.8);
-
-    public static Board board = new Board();
+    */
+   public static int pieceSize = (int) (squareSize * 0.8);
+   
+    public static BoardManager boardManager = new BoardManager();
+    public static ExecutionListener executionListener = boardManager;
     public static Scene scene = new Scene();
-
-    public static int windowWidth = Board.size * squareSize + offsetX;
-    public static int windowHeight = Board.size * squareSize + offsetY;
-
+    
+    public static int windowWidth = BoardManager.size * squareSize + offsetX;
+    public static int windowHeight = BoardManager.size * squareSize + offsetY;
+    
     private static Random random = new Random();
     private static Timer t = new Timer(random.nextInt(1000) + 500, (a) -> {
         // Caso o jogador pause o jogo logo após fazer uma jogada, o algoritimo não
         // executará sua jogada até que o jogo tenha sido despausado.
         if(App.isGameActive)
-            App.ai.execute(App.ai.choseMovement(App.board));
+            App.ai.execute(App.ai.choseMovement(App.boardManager));
     });
 
     public static void update() {
         try {
             // Verifica se um dos jogadores está atualmente sem movimentos possiveis
-            if (board.currentTurn == 1) {
-                isPlayer1OutOfMoves = board.getPlayablePieces().size() == 0;
+            if (boardManager.currentTurn == 1) {
+                isPlayer1OutOfMoves = boardManager.getPlayablePieces().size() == 0;
             } else {
-                isPlayer2OutOfMoves = board.getPlayablePieces().size() == 0;
+                isPlayer2OutOfMoves = boardManager.getPlayablePieces().size() == 0;
             }
 
-            if (((board.getPlayer1PieceCount() == 0 || board.getPlayer2PieceCount() == 0 || isPlayer1OutOfMoves
+            if (((boardManager.getBoard().getPieceCount(Piece.PLAYER1) == 0 || boardManager.getBoard().getPieceCount(Piece.PLAYER2) == 0 || isPlayer1OutOfMoves
                     || isPlayer2OutOfMoves)) && !playerWon) {
                 t.stop();
 
-                if (board.getPlayer1PieceCount() == 0 || isPlayer1OutOfMoves) {
+                if (boardManager.getBoard().getPieceCount(Piece.PLAYER1) == 0 || isPlayer1OutOfMoves) {
                     player2Won = true;
-                } else if (board.getPlayer2PieceCount() == 0 || isPlayer2OutOfMoves) {
+                } else if (boardManager.getBoard().getPieceCount(Piece.PLAYER2) == 0 || isPlayer2OutOfMoves) {
                     player1Won = true;
                 }
 
@@ -97,7 +106,7 @@ public class App implements Runnable {
             scene.update();
 
             // Se ativo notifica a IA de que pode fazer sua jogada
-            if (playingAgainstAI && board.currentTurn == 2 && !playerWon && !isPlayer2OutOfMoves) {
+            if (playingAgainstAI && boardManager.currentTurn == 2 && !playerWon && !isPlayer2OutOfMoves) {
                 t.setRepeats(false);
                 t.start();
                 // Para maior sensação de realismo e fuildez das jogadas adiciona uma tempo de espera
@@ -110,7 +119,7 @@ public class App implements Runnable {
     }
 
     public static void startNewGame() {
-        board.resetBoard();
+        boardManager.reset();
         scene.clearAuxBoard();
         isGameActive = true;
         alreadyStartedAGame = true;

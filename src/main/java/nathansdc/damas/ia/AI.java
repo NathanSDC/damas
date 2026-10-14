@@ -4,19 +4,17 @@ import java.util.List;
 import java.util.Random;
 
 import main.java.nathansdc.damas.App;
-import main.java.nathansdc.damas.jogo.Board;
+import main.java.nathansdc.damas.jogo.BoardManager;
+import main.java.nathansdc.damas.jogo.Movement;
 
 public class AI {
     
     private Random random = new Random();
     private double mistakeChance = 0.3;
     
-    public Movement choseMovement(Board board) {
-        List<Movement> playablePieces = board.getPlayablePieces();
+    public Movement choseMovement(BoardManager boardManager) {
+        List<Movement> playablePieces = boardManager.getPlayablePieces();
 
-        // TOD O: Debug active
-        // System.out.println(playablePieces.size());
-        
         if (playablePieces.size() == 1) {
             return playablePieces.get(0);
         }
@@ -40,8 +38,7 @@ public class AI {
     
     public void execute(Movement movement) {
         try {
-            App.board.movePiece(movement.getSourceX(), movement.getSourceY(), movement.getTargetX(), movement.getTargetY());
-            
+            Movement.execute(movement, App.boardManager);
             App.update();
         } catch (Exception e) {
             e.printStackTrace();
