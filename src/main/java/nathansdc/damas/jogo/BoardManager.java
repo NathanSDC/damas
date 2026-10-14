@@ -147,11 +147,11 @@ public class BoardManager implements ExecutionListener{
                             enemyOnWay = true;
                             enemyX = nx;
                             enemyY = ny;
-                            availableMovements[enemyX][enemyY] = 2;
                         } else break; // Encontrou peça própria bloqueando a diagonal
                     } else {
                         // Se já encontramos um inimigo, as próximas casas vazias são opções de pouso da captura
                         if (current == Piece.EMPTY) {
+                            availableMovements[enemyX][enemyY] = 2;
                             availableMovements[nx][ny] = 1;
                             availableMovements[x][y] = 3;
                         } else break; // Outra peça (amiga ou inimiga) bloqueando o pouso do salto

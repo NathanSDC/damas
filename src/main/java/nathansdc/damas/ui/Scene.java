@@ -140,7 +140,7 @@ public class Scene extends JPanel {
                 } else if (auxBoard[i][j] == 2) { // Peça inimiga marcada como possivel captura
                     g.setColor(Color.decode("#cf7f8d"));
                 } else if (auxBoard[i][j] == 3) { // Peça atual selecionada
-                    g.setColor(Color.decode("#72bbc5"));
+                    g.setColor(Color.decode("#c7dbdd"));
                 } else {
                     if ((i + j) % 2 == 0) {
                         g.setColor(Color.decode("#c08b60"));

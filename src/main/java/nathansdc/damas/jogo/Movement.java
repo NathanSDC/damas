@@ -302,10 +302,13 @@ public class Movement {
                 // Se chegou ao destino antes de quebrar as regras, o caminho é válido
                 if (nx == targetX && ny == targetY) {
                     isValid = true;
+                    break;
                 }
 
-                if (board.isOutOfBounds(nx, ny))
+                if (board.isOutOfBounds(nx, ny)){
                     isValid = false;
+                    break;
+                }
 
                 Piece currentPiece = board.getPiece(nx, ny);
 
@@ -314,6 +317,7 @@ public class Movement {
                     // bloqueado
                     if (encounteredAnEnemy || (currentPiece != enemysPiece && currentPiece != enemysKing)) {
                         isValid = false;
+                        break;
                     } else {
                         isCapture = true;
                     }
@@ -322,7 +326,6 @@ public class Movement {
                 }
                 step++;
 
-                step++;
             }
         } else {
             int allowedDirection = (App.boardManager.currentTurn == 1) ? -1 : 1;
