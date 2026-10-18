@@ -432,7 +432,6 @@ public class Movement {
 
         manager.board = test;
         App.executionListener.executed(true);
-        System.out.println(movement.toString());
         return true;
     }
 
