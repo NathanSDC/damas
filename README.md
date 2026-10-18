@@ -3,7 +3,23 @@
 
 Um jogo de damas simples, atualmente com dois modos de jogo e regras básicas de movimentação e captura.
 
-## v0.0.1-alpha [LATEST]
+## v0.2.5-alpha [LATEST]
+
+Atualizações:
+   - Jogabilidade:
+      + Opção de alterar as regras de captura para peças comuns: Capturar de ambos os lados
+      + Algoritimo da IA melhorado
+   - Gráficos
+      + Substituição do botão do projeto por botão de configurações gerais no menu
+      + Novos temas de cores para o aplicativo e tabuleiro: 
+         - Escuro
+         - Claro
+         - Clássico
+         - Azul
+         - Verde
+         - Rosa
+
+## v0.0.1-alpha
 
 Possui dois modos de jogo: 
    - Contra player
@@ -12,10 +28,3 @@ Possui dois modos de jogo:
    - Contra IA
       + Modo de jogo em turnos, após a jogada do player o algoritmo calcula uma jogada e a executa em aproximadamente 2 segundos.
       + O algoritmo tem 50% de chance de calcular uma melhor jogada possivel, ou então jogar uma peça aleatóriamente.
-
-## Em breve:
-
-   - Captura de múltiplas peças (combo).
-   - Opção de alterar a dificuldade do Algoritimo do modo IA.
-   - Opção de alterar as regras de movimentação no tabuleiro (Tornar dama obrigatóriamente, etc).
-   - Opção de alterar as regras de captura tanto para peças comuns ou para damas (Captura obrigatória, etc).

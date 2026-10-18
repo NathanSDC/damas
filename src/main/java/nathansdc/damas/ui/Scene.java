@@ -201,7 +201,7 @@ public class Scene extends JPanel {
     });
     private InvisibleButton discardThemeButton = new InvisibleButton(() -> {
         App.colorScheme.setCurrentTheme(backupTheme);
-
+        App.activeDialogue = ActiveDialogue.SETTINGS;
     });
 
     public Scene() {
@@ -304,6 +304,13 @@ public class Scene extends JPanel {
         if (hasSettingsButtons) {
             saveSettingsButton.setBounds(0, 0, 0, 0);
             discardSettingsButton.setBounds(0, 0, 0, 0);
+            captureDirectionBothSettingsButton.setBounds(0, 0, 0, 0);
+            forcedCaptureSettingsButton.setBounds(0, 0, 0, 0);
+            forcedPromotionSettingsButton.setBounds(0, 0, 0, 0);
+            themeSettingsButton.setBounds(0, 0, 0, 0);
+            menuStyleSettingsButton.setBounds(0, 0, 0, 0);
+            difficultySettingsButton.setBounds(0, 0, 0, 0);
+            windowSizeSettingsButton.setBounds(0, 0, 0, 0);
         }
 
         if (hasAATCButtons) {

@@ -373,17 +373,12 @@ public class Movement {
                         if (target == enemysPiece || target == enemysKing) {
                             isValid = true;
                             isCapture = true;
-                            return;
                         } else {
                             isValid = false;
-                            return;
                         }
                     } else {
                         isValid = false;
-                        return;
                     }
-                } else {
-                    isValid = false;
                     return;
                 }
             }
