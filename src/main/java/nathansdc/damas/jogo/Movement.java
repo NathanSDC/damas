@@ -65,16 +65,13 @@ public class Movement {
     private void calculeScore(Board board) {
         int score = 0;
 
-        // Adiciona +10 para cada casa movida
-        score += (int) Math.sqrt(Math.pow(targetX - sourceX, 2) + Math.pow(targetY - sourceY, 2)) * 5;
-
         if (isCapture) {
             Piece enemy = board.getPiece(capturedEnemyX, capturedEnemyY);
             boolean isKing = (enemy == Piece.PLAYER1_KING || enemy == Piece.PLAYER2_KING);
 
             if (!isKing) {
                 // Adiciona +50 ao capturar uma peça comum inimiga
-                score += 50;
+                score += 30;
             } else {
                 // Adiciona +150 ao capturar uma dama inimiga
                 score += 150;
@@ -86,6 +83,10 @@ public class Movement {
         Piece self = board.getPiece(sourceX, sourceY);
         // Verifica se a peça atualmente não é uma dama
         if (!(self == Piece.PLAYER1_KING || self == Piece.PLAYER2_KING)) {
+
+            // Adiciona +5 por casa movida
+            score += (int) Math.sqrt(Math.pow(targetX - sourceX, 2) + Math.pow(targetY - sourceY, 2)) * 5;
+
             // Testa se esta peça faz parte do repertório do player 1
             if (self.getCode() == 1) {
                 if (targetY == 0) {
@@ -98,6 +99,9 @@ public class Movement {
                     isPromotion = true;
                 }
             }
+        } else {
+            // Para damas adiciona +1 por casa movida
+            score += (int) Math.sqrt(Math.pow(targetX - sourceX, 2) + Math.pow(targetY - sourceY, 2)) * 1;
         }
 
         this.score = score;
@@ -121,7 +125,7 @@ public class Movement {
      * @return {@code List<Movement>} uma lista contendo todos os movimentos
      *         possiveis para a peça na posição de origem
      */
-    public static List<Movement> getMovements(Board board, int sourceX, int sourceY) throws IndexOutOfBoundsException {
+    public static List<Movement> getMovements(Board board, int sourceX, int sourceY, int currentTurn) throws IndexOutOfBoundsException {
         List<Movement> allowedMoves = new ArrayList<>();
 
         if (board.isOutOfBounds(sourceX, sourceY)) {
@@ -139,8 +143,8 @@ public class Movement {
 
         // marcar diretamente as peças inimigas para menor repetiçao de código mais a
         // frente
-        Piece enemysPiece = (App.boardManager.currentTurn == 1) ? Piece.PLAYER2 : Piece.PLAYER1;
-        Piece enemysKing = (App.boardManager.currentTurn == 1) ? Piece.PLAYER2_KING : Piece.PLAYER1_KING;
+        Piece enemysPiece = (currentTurn == 1) ? Piece.PLAYER2 : Piece.PLAYER1;
+        Piece enemysKing = (currentTurn == 1) ? Piece.PLAYER2_KING : Piece.PLAYER1_KING;
 
         // As quatro direções de movimento possiveis para uma peça {x, y}
         int[][] directions = { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } };
@@ -208,7 +212,7 @@ public class Movement {
                 move.sourceX = sourceX;
                 move.sourceY = sourceY;
 
-                int allowedDirection = (App.boardManager.currentTurn == 1) ? -1 : 1;
+                int allowedDirection = (currentTurn == 1) ? -1 : 1;
                 if (!App.captureDirectionBoth) {
                     if (!isKing && dy != allowedDirection) {
                         continue;

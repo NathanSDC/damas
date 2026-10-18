@@ -26,6 +26,10 @@ public class BoardManager implements ExecutionListener{
         board.populate();
     }
 
+    public BoardManager(Board board) {
+        this.board = board;
+    }
+
     public boolean restorePreviewState(){
         // Pega o indice do ultimo jogo salvo
         int index = previewStates.size() - 2;
@@ -221,7 +225,7 @@ public class BoardManager implements ExecutionListener{
             for (int i = 0; i < Board.SIZE; i++){
                 for (int j = 0; j < Board.SIZE; j++) {
                     if (isPieceOf(i, j)){
-                        movements.addAll(Movement.getMovements(board, i, j));
+                        movements.addAll(Movement.getMovements(board, i, j, currentTurn));
                     }
                 }
             }

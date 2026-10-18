@@ -89,7 +89,7 @@ public class MouseHandler implements MouseListener {
                     if (App.scene.auxiliarBoard[clickX][clickY] == 2) {
                         // Movimento de captura clicando na peça do oponente
                         Movement m = new Movement(selectedX, selectedY, clickX, clickY, App.boardManager.getBoard());
-                        List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY);
+                        List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY, App.boardManager.currentTurn);
                         for (Movement move : moves) {
                             if (move.equals(m)) {
                                 Movement.execute(move, App.boardManager);
@@ -113,7 +113,7 @@ public class MouseHandler implements MouseListener {
                 if (hasSelectedPiece) {
                     if (App.scene.auxiliarBoard[clickX][clickY] == 1) {
                         Movement m = new Movement(selectedX, selectedY, clickX, clickY, App.boardManager.getBoard());
-                        List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY);
+                        List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY, App.boardManager.currentTurn);
                         for (Movement move : moves) {
                             if (move.equals(m)) {
                                 if (Movement.execute(move, App.boardManager)) {
