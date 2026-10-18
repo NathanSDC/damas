@@ -8,8 +8,11 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import main.java.nathansdc.damas.ia.AI;
+import main.java.nathansdc.damas.ia.AI.Difficulty;
 import main.java.nathansdc.damas.jogo.BoardManager;
 import main.java.nathansdc.damas.jogo.Piece;
+import main.java.nathansdc.damas.ui.Scene.ActiveDialogue;
+import main.java.nathansdc.damas.ui.ColorScheme;
 import main.java.nathansdc.damas.ui.InterfaceMetrics;
 import main.java.nathansdc.damas.ui.Scene;
 import main.java.nathansdc.damas.ui.Window;
@@ -17,26 +20,26 @@ import main.java.nathansdc.damas.util.ExecutionListener;
 
 public class App implements Runnable {
 
-    
     public static boolean running = true;
     public static boolean isGameActive = false;
     public static boolean alreadyStartedAGame = false;
     
     // menu booleans
     public static boolean isMenuActive = true;
-    public static boolean isPlayModeChangeConfirmationDialogueActive = false;
-    public static boolean isRedirectConfirmationDialogueActive = false;
-    public static boolean isPlayerWonDialogueActive = false;
-    
-    public static AI ai = new AI();
+    public static ActiveDialogue activeDialogue = ActiveDialogue.MENU;
+
+    public static Difficulty ai_Difficulty = Difficulty.HARD;
+    public static AI ai = new AI(ai_Difficulty);
+
+    public static ColorScheme colorScheme = ColorScheme.getInstance();
 
     // player won tests
     public static boolean playerWon = false;
     public static boolean player1Won = false;
     public static boolean player2Won = false;
     
-    public static boolean isPlayer1OutOfMoves = false;
-    public static boolean isPlayer2OutOfMoves = false;
+    private static boolean isPlayer1OutOfMoves = false;
+    private static boolean isPlayer2OutOfMoves = false;
     
     /**
      * <pre>
@@ -44,30 +47,20 @@ public class App implements Runnable {
      * true = player/ai
     */
     public static boolean playingAgainstAI = false;
-   
-    public static int offsetX = 15;
-    public static int offsetY = 39;
+    public static boolean forcedPromotion = false;
+    public static boolean forcedCapture = false;
+    public static boolean captureDirectionBoth = false;
 
     public static String appTitle = "Damas";
-
-    public static int squareSize = 100;
 
     public static InterfaceMetrics getMetrics() {
         return InterfaceMetrics.getInstance();
     }
-    
-    /**
-     * PieceSize é uma constante relativa ao valor de SquareSize e possui sempre 80%
-     * do valor total do mesmo
-    */
-   public static int pieceSize = (int) (squareSize * 0.8);
    
     public static BoardManager boardManager = new BoardManager();
     public static ExecutionListener executionListener = boardManager;
+
     public static Scene scene = new Scene();
-    
-    public static int windowWidth = BoardManager.size * squareSize + offsetX;
-    public static int windowHeight = BoardManager.size * squareSize + offsetY;
     
     private static Random random = new Random();
     private static Timer t = new Timer(random.nextInt(1000) + 500, (a) -> {
@@ -99,17 +92,17 @@ public class App implements Runnable {
                 isMenuActive = false;
                 isGameActive = false;
                 playerWon = true;
-                isPlayerWonDialogueActive = true;
+                App.activeDialogue = ActiveDialogue.SOMEONE_WON;
             }
 
-            pieceSize = (int) (squareSize * 0.8);
+            InterfaceMetrics.getInstance().update();
             scene.update();
 
             // Se ativo notifica a IA de que pode fazer sua jogada
             if (playingAgainstAI && boardManager.currentTurn == 2 && !playerWon && !isPlayer2OutOfMoves) {
                 t.setRepeats(false);
                 t.start();
-                // Para maior sensação de realismo e fuildez das jogadas adiciona uma tempo de espera
+                // Para maior sensação de realismo e fluidez das jogadas adiciona uma tempo de espera
                 // aleatório entre uma jogada e outra
                 t.setDelay(random.nextInt(1000) + 500);// 0.5s ~ 1.5s de espera entre jogadas
             }
@@ -120,7 +113,7 @@ public class App implements Runnable {
 
     public static void startNewGame() {
         boardManager.reset();
-        scene.clearAuxBoard();
+        scene.clearAuxiliarBoard();
         isGameActive = true;
         alreadyStartedAGame = true;
         playerWon = false;
@@ -129,14 +122,15 @@ public class App implements Runnable {
         isPlayer1OutOfMoves = false;
         isPlayer2OutOfMoves = false;
         isMenuActive = false;
-        isPlayerWonDialogueActive = false;
-        isPlayModeChangeConfirmationDialogueActive = false;
-        isRedirectConfirmationDialogueActive = false;
+        App.activeDialogue = ActiveDialogue.MENU;
     }
 
     public static void main(String[] args) throws Exception {
-        Window w = new Window(appTitle, windowWidth, windowHeight);
-        // TODO: Adicionar mais responsividade a janela
+
+        colorScheme.setCurrentTheme(ColorScheme.Theme.DARK);
+        scene.backupTheme = colorScheme.getCurrentTheme();
+
+        Window w = new Window(appTitle, getMetrics().getWindowWidth(), getMetrics().getWindowHeight());
         w.setResizable(false); // impede a janela de mudar seu tamanhho padrao
 
         w.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

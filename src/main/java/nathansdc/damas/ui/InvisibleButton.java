@@ -1,7 +1,9 @@
 package main.java.nathansdc.damas.ui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 
 import main.java.nathansdc.damas.util.MouseHandler;
 
@@ -34,6 +36,14 @@ public class InvisibleButton extends Component {
 
     public void setOnHover(boolean onHover) {
         this.onHover = onHover;
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+
+        g.setColor(Color.RED);
+        g.fillRect(getX(), getY(), getWidth(), getHeight());
     }
 
 }

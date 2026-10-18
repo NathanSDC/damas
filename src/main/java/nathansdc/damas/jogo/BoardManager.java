@@ -3,6 +3,7 @@ package main.java.nathansdc.damas.jogo;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.java.nathansdc.damas.App;
 import main.java.nathansdc.damas.util.ExecutionListener;
 
 public class BoardManager implements ExecutionListener{
@@ -78,9 +79,9 @@ public class BoardManager implements ExecutionListener{
      * @param x posição {@code x} da peça no tabuleiro
      * @param y posição {@code y} da peça no tabuleiro
     */
-    public Integer[][] showavailableMovements(int x, int y) {
+    public Integer[][] showavailableMovements(Board board, int x, int y) {
         Integer[][] availableMovements = new Integer[size][size];
-
+        
         for (int i = 0; i < availableMovements.length; i++) {
             for (int j = 0; j < availableMovements.length; j++) {
                 availableMovements[i][j] = 0;
@@ -116,11 +117,28 @@ public class BoardManager implements ExecutionListener{
             int dy = dir[1];
 
             // Se for peça comum, ela só anda na direção permitida para frente (a menos que
-            // seja captura, mas no boardManager clássico a peça comum só captura para frente)
+            // seja captura, mas no tabuleiro clássico a peça comum só captura para frente)
             int allowedDirection = (currentTurn == 1) ? -1 : 1;
-            if (!isKing && dy != allowedDirection) {
-                // TODO: Adicionar opção de captura para trás nas configurações
-                continue;
+            if (!App.captureDirectionBoth) {
+                if (!isKing && dy != allowedDirection) {
+                    continue;
+                }
+            } else {
+                if (!isKing && dy != allowedDirection) {
+                    int TargetX = x + (2 * dx);
+                    int TargetY = y + (2 * dy);
+                    int capturedX = x + dx;
+                    int capturedY = y + dy;
+    
+                    Movement m = new Movement(x, y, TargetX, TargetY, capturedX, capturedY, board);
+                    if (m.isValid() && m.isCapture()){
+                        availableMovements[capturedX][capturedY] = 2;
+                        availableMovements[TargetX][TargetY] = 1;
+                        availableMovements[x][y] = 3;
+                    } else {
+                        continue;
+                    }    
+                }
             }
 
             if (isKing) {

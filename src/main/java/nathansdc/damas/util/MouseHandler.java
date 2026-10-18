@@ -1,6 +1,7 @@
 package main.java.nathansdc.damas.util;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
@@ -56,6 +57,7 @@ public class MouseHandler implements MouseListener {
     public void mouseEntered(MouseEvent e) {
         if ((parent!=null) && parent instanceof InvisibleButton) {
             ((InvisibleButton)parent).onHover = true;
+            ((InvisibleButton)parent).setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
         App.update();
     }
@@ -64,26 +66,27 @@ public class MouseHandler implements MouseListener {
     public void mouseExited(MouseEvent e) {
         if ((parent!=null) && parent instanceof InvisibleButton) {
             ((InvisibleButton)parent).onHover = false;
+            ((InvisibleButton)parent).setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
         App.update();
     }
 
     private void handleSceneClick(MouseEvent e) {
-        double a = App.squareSize + (App.offsetX / BoardManager.size);
+        double a = App.getMetrics().getSquareSize() + (App.getMetrics().getOffsetX() / BoardManager.size);
 
         clickX = (int) (Math.ceil(e.getX() / a)) - 1;
-        clickY = (int) (Math.ceil((e.getY() - (App.offsetY - App.offsetX)) / a)) - 1;
+        clickY = (int) (Math.ceil((e.getY() - (App.getMetrics().getOffsetY() - App.getMetrics().getOffsetX())) / a)) - 1;
 
         if ((App.isGameActive && !App.playerWon) && !App.boardManager.getBoard().isOutOfBounds(clickX, clickY)
                 && ((App.playingAgainstAI && App.boardManager.currentTurn == 1) || !App.playingAgainstAI)) {
             if (!App.boardManager.getBoard().isThereEmpty(clickX, clickY)) {
                 if (!hasSelectedPiece) {
-                    App.scene.auxBoard = App.boardManager.showavailableMovements(clickX, clickY);
+                    App.scene.auxiliarBoard = App.boardManager.showavailableMovements(App.boardManager.getBoard(), clickX, clickY);
                     selectedX = clickX;
                     selectedY = clickY;
                     hasSelectedPiece = true;
                 } else {
-                    if (App.scene.auxBoard[clickX][clickY] == 2) {
+                    if (App.scene.auxiliarBoard[clickX][clickY] == 2) {
                         // Movimento de captura clicando na peça do oponente
                         Movement m = new Movement(selectedX, selectedY, clickX, clickY, App.boardManager.getBoard());
                         List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY);
@@ -96,19 +99,19 @@ public class MouseHandler implements MouseListener {
                                 break;
                             }
                         }
-                        App.scene.clearAuxBoard();
+                        App.scene.clearAuxiliarBoard();
                     } else {
                         // Quaisquer cliques fora de uma marcada ou na propria peça desativa a seleçao
                         // atual
                         hasSelectedPiece = false;
                         selectedX = 0;
                         selectedY = 0;
-                        App.scene.clearAuxBoard();
+                        App.scene.clearAuxiliarBoard();
                     }
                 }
             } else {
                 if (hasSelectedPiece) {
-                    if (App.scene.auxBoard[clickX][clickY] == 1) {
+                    if (App.scene.auxiliarBoard[clickX][clickY] == 1) {
                         Movement m = new Movement(selectedX, selectedY, clickX, clickY, App.boardManager.getBoard());
                         List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY);
                         for (Movement move : moves) {
@@ -117,7 +120,7 @@ public class MouseHandler implements MouseListener {
                                     hasSelectedPiece = false;
                                     selectedX = 0;
                                     selectedY = 0;
-                                    App.scene.clearAuxBoard();
+                                    App.scene.clearAuxiliarBoard();
                                     break;
                                 }   
                             }

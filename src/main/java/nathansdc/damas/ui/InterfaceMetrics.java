@@ -57,7 +57,19 @@ public class InterfaceMetrics {
     // ALGUM JOGADOR GANHOU (2) ---------------------------------------------------------|
     // Tamanho do menu - (margem esuerda e direita) - (espaçamento entre botões) / quantidade de botões
     private int playerWonButtonWidth = (confirmationMenuWidth - (confirmationButtonMargin * 2) - (buttonSpacing * 2)) / 3;
-    // MENU DE OPÇÕES (3) ---------------------------------------------------------------|
+    // MENU DE CONFIGURAÇÕES (3) ---------------------------------------------------------------|
+    private int settingsButtonSpacing = 15;
+
+    private int settingsOptListMargin = 40;
+    private int settingsButtonWidth_optList = ((windowWidth/2) - (settingsOptListMargin*2)) + settingsButtonSpacing;
+    private int settingsButtonX_optListLeft = settingsOptListMargin;
+    private int settingsButtonX_optListRight = settingsOptListMargin + settingsButtonWidth_optList + settingsButtonSpacing;
+
+    private int settingsConfirmationMargin = 75;
+    private int settingsButtonWidth_confirmation = ((windowWidth/2) - (settingsConfirmationMargin*2)) - settingsButtonSpacing;
+    private int settingsButtonY_confirmation = windowHeight - (buttonHeight + (settingsConfirmationMargin));
+    private int settingsButtonX_confirmationLeft = ((windowWidth/2) - settingsButtonWidth_confirmation) - (settingsButtonSpacing/2);
+    private int settingsButtonX_confirmationRight = ((windowWidth/2)) + (settingsButtonSpacing/2);
 
     private InterfaceMetrics() {
     }
@@ -204,6 +216,46 @@ public class InterfaceMetrics {
 
     public int getMenuY() {
         return menuY;
+    }
+
+    public int getSettingsButtonSpacing() {
+        return settingsButtonSpacing;
+    }
+
+    public int getSettingsOptListMargin() {
+        return settingsOptListMargin;
+    }
+
+    public int getSettingsButtonWidth_optList() {
+        return settingsButtonWidth_optList;
+    }
+
+    public int getSettingsButtonX_optListLeft() {
+        return settingsButtonX_optListLeft;
+    }
+
+    public int getSettingsButtonX_optListRight() {
+        return settingsButtonX_optListRight;
+    }
+
+    public int getSettingsConfirmationMargin() {
+        return settingsConfirmationMargin;
+    }
+
+    public int getSettingsButtonWidth_confirmation() {
+        return settingsButtonWidth_confirmation;
+    }
+
+    public int getSettingsButtonY_confirmation() {
+        return settingsButtonY_confirmation;
+    }
+
+    public int getSettingsButtonX_confirmationLeft() {
+        return settingsButtonX_confirmationLeft;
+    }
+
+    public int getSettingsButtonX_confirmationRight() {
+        return settingsButtonX_confirmationRight;
     }
     
 }

@@ -26,9 +26,11 @@ public class Window extends JFrame {
     private int preferredWidth;
 
     public Window(String title){
+        super(title);
     }
 
     public Window(String title, int width, int height){
+        super(title);
         this.preferredWidth = width;
         this.preferredHeight = height;
 

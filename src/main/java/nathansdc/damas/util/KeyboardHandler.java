@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import main.java.nathansdc.damas.App;
+import main.java.nathansdc.damas.ui.Scene.ActiveDialogue;
 
 public class KeyboardHandler implements KeyListener {
 
@@ -16,10 +17,10 @@ public class KeyboardHandler implements KeyListener {
             } else if(App.alreadyStartedAGame && !App.isGameActive && !App.playerWon){
                 App.isGameActive = true;
                 App.isMenuActive = false;
-                App.isPlayModeChangeConfirmationDialogueActive = false;
-                App.isRedirectConfirmationDialogueActive = false;
+                App.activeDialogue = ActiveDialogue.MENU;
+            } else if (!App.alreadyStartedAGame && !App.isGameActive && !App.playerWon) {
+                App.activeDialogue = ActiveDialogue.MENU;
             } else if (App.alreadyStartedAGame && App.playerWon) {
-                App.isPlayerWonDialogueActive = false;
                 App.isMenuActive = true;
                 App.isGameActive = false;
                 App.alreadyStartedAGame = false;

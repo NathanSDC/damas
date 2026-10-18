@@ -108,17 +108,15 @@ public class Movement {
      * Calcula de acordo com as regras do jogo estabelecidas ativas atualmente para
      * quais casas a peça que se encontra nas posições:
      * {@code sourceX} {@code sourceY}, referente ao
-     * {@link main.java.nathansdc.damas.jogo.BoardManager BoardManager}, pode se
+     * {@link main.java.nathansdc.damas.jogo.Board Board}, pode se
      * mover.
      * 
-     * @param sourceX posição {@code X} no
-     *                {@link main.java.nathansdc.damas.jogo.BoardManager
-     *                BoardManager} da peça que
-     *                será tratada
-     * @param sourceY posição {@code Y} no
-     *                {@link main.java.nathansdc.damas.jogo.BoardManager
-     *                BoardManager} da peça que
-     *                será tratada
+     * @param sourceX posição {@code X}, no
+     *                {@link main.java.nathansdc.damas.jogo.Board Board}, da peça
+     *                que será tratada
+     * @param sourceY posição {@code Y}, no
+     *                {@link main.java.nathansdc.damas.jogo.Board Board}, da peça
+     *                que será tratada
      * 
      * @return {@code List<Movement>} uma lista contendo todos os movimentos
      *         possiveis para a peça na posição de origem
@@ -205,15 +203,43 @@ public class Movement {
                     step++;
                 }
             } else {
-                int allowedDirection = (App.boardManager.currentTurn == 1) ? -1 : 1;
-                if (!isKing && dy != allowedDirection) {
-                    // TODO: Adicionar opção de captura para trás nas configurações
-                    continue;
-                }
 
                 Movement move = new Movement();
                 move.sourceX = sourceX;
                 move.sourceY = sourceY;
+
+                int allowedDirection = (App.boardManager.currentTurn == 1) ? -1 : 1;
+                if (!App.captureDirectionBoth) {
+                    if (!isKing && dy != allowedDirection) {
+                        continue;
+                    }
+                } else {
+                    if (!isKing && dy != allowedDirection) {
+                        int targetX = sourceX + (2 * dx);
+                        int targetY = sourceY + (2 * dy);
+                        int enemysX = sourceX + dx;
+                        int enemysY = sourceY + dy;
+
+                        if (!board.isOutOfBounds(targetX, targetY)
+                                && board.isThereEmpty(targetX, targetY)) {
+                            Piece target = board.getPiece(enemysX, enemysY);
+                            if (target == enemysPiece || target == enemysKing) {
+
+                                move.targetX = targetX;
+                                move.targetY = targetY;
+                                move.capturedEnemyX = enemysX;
+                                move.capturedEnemyY = enemysY;
+
+                                move.isCapture = true;
+                                move.isValid = true;
+                                move.calculeScore(board);
+
+                                allowedMoves.add(move);
+                            }
+                        }
+                        continue;
+                    }
+                }
 
                 int targetXA = sourceX + dx;
                 int targetYA = sourceY + dy;
@@ -278,6 +304,7 @@ public class Movement {
         // ao de coluna)
         if (Math.abs(diffLinha) != Math.abs(diffColuna)) {
             isValid = false;
+            return;
         }
 
         int dx = diffLinha > 0 ? 1 : -1;
@@ -305,7 +332,7 @@ public class Movement {
                     break;
                 }
 
-                if (board.isOutOfBounds(nx, ny)){
+                if (board.isOutOfBounds(nx, ny)) {
                     isValid = false;
                     break;
                 }
@@ -322,16 +349,43 @@ public class Movement {
                         isCapture = true;
                     }
                     encounteredAnEnemy = true;
-                     // Primeira peça inimiga encontrada
+                    // Primeira peça inimiga encontrada
                 }
                 step++;
 
             }
         } else {
             int allowedDirection = (App.boardManager.currentTurn == 1) ? -1 : 1;
-            if (!isKing && dy != allowedDirection) {
-                // TODO: Adicionar opção de captura para trás nas configurações
-                isValid = false;
+            if (!App.captureDirectionBoth) {
+                if (!isKing && dy != allowedDirection) {
+                    isValid = false;
+                    return;
+                }
+            } else {
+                if (!isKing && dy != allowedDirection) {
+                    int targetX = sourceX + (2 * dx);
+                    int targetY = sourceY + (2 * dy);
+                    int enemysX = sourceX + dx;
+                    int enemysY = sourceY + dy;
+
+                    if (!board.isOutOfBounds(targetX, targetY) && board.isThereEmpty(targetX, targetY)) {
+                        Piece target = board.getPiece(enemysX, enemysY);
+                        if (target == enemysPiece || target == enemysKing) {
+                            isValid = true;
+                            isCapture = true;
+                            return;
+                        } else {
+                            isValid = false;
+                            return;
+                        }
+                    } else {
+                        isValid = false;
+                        return;
+                    }
+                } else {
+                    isValid = false;
+                    return;
+                }
             }
 
             int targetXA = sourceX + dx;
@@ -339,23 +393,24 @@ public class Movement {
 
             if (!board.isOutOfBounds(targetXA, targetYA) && board.isThereEmpty(targetXA, targetYA)) {
                 isValid = true;
-            } else isValid = false;
+                return;
+            }
 
-            if (!isValid) {
-                int targetX = sourceX + (2 * dx);
-                int targetY = sourceY + (2 * dy);
-                int enemysX = sourceX + dx;
-                int enemysY = sourceY + dy;
-    
-                if (!board.isOutOfBounds(targetX, targetY) && board.isThereEmpty(targetX, targetY)) {
-                    Piece target = board.getPiece(enemysX, enemysY);
-                    if (target == enemysPiece || target == enemysKing) {
-                        isValid = true;
-                        isCapture = true;
-                    } else {
-                        isValid = false;
-                    }
-                } else isValid = false;
+            int targetX = sourceX + (2 * dx);
+            int targetY = sourceY + (2 * dy);
+            int enemysX = sourceX + dx;
+            int enemysY = sourceY + dy;
+
+            if (!board.isOutOfBounds(targetX, targetY) && board.isThereEmpty(targetX, targetY)) {
+                Piece target = board.getPiece(enemysX, enemysY);
+                if (target == enemysPiece || target == enemysKing) {
+                    isValid = true;
+                    isCapture = true;
+                } else {
+                    isValid = false;
+                }
+            } else {
+                isValid = false;
             }
         }
     }
@@ -382,6 +437,7 @@ public class Movement {
 
         manager.board = test;
         App.executionListener.executed(true);
+        System.out.println(movement.toString());
         return true;
     }
 
@@ -459,14 +515,17 @@ public class Movement {
 
     /**
      * <p>
-     * Se um {@code Movement} não for válido ele não pode ser executado utilizando a função {@link #execute}.
+     * Se um {@code Movement} não for válido ele não pode ser executado utilizando a
+     * função {@link #execute}.
      * <p>
-     * Logo na criação de um {@code Movement} utilizando os construtores públicos é feita a veificação de validez. 
-     * Caso as informações passadas não atendam as regras estabelecidas o {@code Movement} é considerado inválido.
+     * Logo na criação de um {@code Movement} utilizando os construtores públicos é
+     * feita a veificação de validez.
+     * Caso as informações passadas não atendam as regras estabelecidas o
+     * {@code Movement} é considerado inválido.
      * 
      * <pre>
-     *  1 - 
-    */
+     * 1 -
+     */
     public boolean isValid() {
         return isValid;
     }
