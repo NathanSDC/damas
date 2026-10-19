@@ -8,7 +8,6 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import main.java.nathansdc.damas.ia.AI;
-import main.java.nathansdc.damas.ia.AI.Difficulty;
 import main.java.nathansdc.damas.jogo.BoardManager;
 import main.java.nathansdc.damas.jogo.Piece;
 import main.java.nathansdc.damas.ui.Scene.ActiveDialogue;
@@ -20,19 +19,22 @@ import main.java.nathansdc.damas.util.ExecutionListener;
 
 public class App implements Runnable {
 
+    // App game control
     public static boolean running = true;
     public static boolean isGameActive = false;
     public static boolean alreadyStartedAGame = false;
+
+    // user settings
+    public static Settings settings = Settings.getInstance();
     
     // menu booleans
     public static boolean isMenuActive = true;
     public static ActiveDialogue activeDialogue = ActiveDialogue.MENU;
 
-    public static Difficulty ai_Difficulty = Difficulty.HARD;
-    public static AI ai = new AI(ai_Difficulty);
-
+    public static AI ai = new AI(settings.getDifficulty());
+    
     public static ColorScheme colorScheme = ColorScheme.getInstance();
-
+    
     // player won tests
     public static boolean playerWon = false;
     public static boolean player1Won = false;
@@ -40,18 +42,6 @@ public class App implements Runnable {
     
     private static boolean isPlayer1OutOfMoves = false;
     private static boolean isPlayer2OutOfMoves = false;
-    
-    /**
-     * <pre>
-     * false = player/player
-     * true = player/ai
-    */
-    public static boolean playingAgainstAI = false;
-    public static boolean forcedPromotion = false;
-    public static boolean forcedCapture = false;
-    public static boolean captureDirectionBoth = false;
-
-    public static String appTitle = "Damas";
 
     public static InterfaceMetrics getMetrics() {
         return InterfaceMetrics.getInstance();
@@ -99,13 +89,17 @@ public class App implements Runnable {
             scene.update();
 
             // Se ativo notifica a IA de que pode fazer sua jogada
-            if (playingAgainstAI && boardManager.currentTurn == 2 && !playerWon && !isPlayer2OutOfMoves) {
+            if (settings.isPlaying_against_ai() && boardManager.currentTurn == 2 && !playerWon && !isPlayer2OutOfMoves) {
                 t.setRepeats(false);
                 t.start();
                 // Para maior sensação de realismo e fluidez das jogadas adiciona uma tempo de espera
                 // aleatório entre uma jogada e outra
                 t.setDelay(random.nextInt(1000) + 500);// 0.5s ~ 1.5s de espera entre jogadas
             }
+
+            settings.save();
+            App.colorScheme.setCurrentTheme(settings.getApp_theme());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -127,17 +121,17 @@ public class App implements Runnable {
 
     public static void main(String[] args) throws Exception {
 
-        colorScheme.setCurrentTheme(ColorScheme.Theme.DARK);
+        colorScheme.setCurrentTheme(settings.getApp_theme());
         scene.backupTheme = colorScheme.getCurrentTheme();
 
-        Window w = new Window(appTitle, getMetrics().getWindowWidth(), getMetrics().getWindowHeight());
+        Window w = new Window(settings.getApp_name(), getMetrics().getWindowWidth(), getMetrics().getWindowHeight());
         w.setResizable(false); // impede a janela de mudar seu tamanhho padrao
 
         w.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         w.add(scene);
         w.pack();
-        w.setTitle(appTitle);
+        w.setTitle(settings.getApp_name());
         w.setVisible(true);
     }
 

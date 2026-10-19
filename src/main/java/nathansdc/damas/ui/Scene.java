@@ -74,7 +74,7 @@ public class Scene extends JPanel {
         if (App.alreadyStartedAGame && !App.playerWon) {
             App.activeDialogue = ActiveDialogue.PLAYMODE_CHANGE_CONFIRMATION;
         } else {
-            App.playingAgainstAI = !App.playingAgainstAI;
+            App.settings.setPlaying_against_ai(!App.settings.isPlaying_against_ai());
         }
     });
 
@@ -98,7 +98,7 @@ public class Scene extends JPanel {
         App.isMenuActive = false;
         App.activeDialogue = ActiveDialogue.MENU;
 
-        App.playingAgainstAI = !App.playingAgainstAI;
+        App.settings.setPlaying_against_ai(!App.settings.isPlaying_against_ai());
     });
     private InvisibleButton declineButton = new InvisibleButton(() -> {
         App.activeDialogue = ActiveDialogue.MENU;
@@ -152,16 +152,16 @@ public class Scene extends JPanel {
         App.activeDialogue = ActiveDialogue.THEME_CHOOSER_DIALOGUE;
     });
     private InvisibleButton captureDirectionBothSettingsButton = new InvisibleButton(() -> {
-        App.captureDirectionBoth = !App.captureDirectionBoth;
+        App.settings.setBoth_direction_capture(!App.settings.isBoth_direction_capture());
     });
     private InvisibleButton forcedCaptureSettingsButton = new InvisibleButton(() -> {
-        App.forcedCapture = !App.forcedCapture;
+        App.settings.setForced_capture(!App.settings.isForced_capture());
     });
     private InvisibleButton difficultySettingsButton = new InvisibleButton(() -> {
         App.activeDialogue = ActiveDialogue.AI_DIFFICULTY_CHOOSER_DIALOGUE;
     });
     private InvisibleButton forcedPromotionSettingsButton = new InvisibleButton(() -> {
-        App.forcedPromotion = !App.forcedPromotion;
+        App.settings.setForced_promotion(!App.settings.isForced_promotion());
     });
     private InvisibleButton windowSizeSettingsButton = new InvisibleButton(() -> {
         // TODO: window size chooser dialogue
@@ -178,29 +178,29 @@ public class Scene extends JPanel {
     public ColorScheme.Theme backupTheme = App.colorScheme.getCurrentTheme();
 
     private InvisibleButton classicThemeButton = new InvisibleButton(() -> {
-        App.colorScheme.setCurrentTheme(ColorScheme.Theme.CLASSIC);
+        App.settings.setApp_theme(ColorScheme.Theme.CLASSIC);
     });
     private InvisibleButton darkThemeButton = new InvisibleButton(() -> {
-        App.colorScheme.setCurrentTheme(ColorScheme.Theme.DARK);
+        App.settings.setApp_theme(ColorScheme.Theme.DARK);
     });
     private InvisibleButton lightThemeButton = new InvisibleButton(() -> {
-        App.colorScheme.setCurrentTheme(ColorScheme.Theme.LIGHT);
+        App.settings.setApp_theme(ColorScheme.Theme.LIGHT);
     });
     private InvisibleButton blueThemeButton = new InvisibleButton(() -> {
-        App.colorScheme.setCurrentTheme(ColorScheme.Theme.BLUE);
+        App.settings.setApp_theme(ColorScheme.Theme.BLUE);
     });
     private InvisibleButton pinkThemeButton = new InvisibleButton(() -> {
-        App.colorScheme.setCurrentTheme(ColorScheme.Theme.PINK);
+        App.settings.setApp_theme(ColorScheme.Theme.PINK);
     });
     private InvisibleButton greenThemeButton = new InvisibleButton(() -> {
-        App.colorScheme.setCurrentTheme(ColorScheme.Theme.GREEN);
+        App.settings.setApp_theme(ColorScheme.Theme.GREEN);
     });
     private InvisibleButton saveThemeButton = new InvisibleButton(() -> {
         App.activeDialogue = ActiveDialogue.SETTINGS;
         backupTheme = App.colorScheme.getCurrentTheme();
     });
     private InvisibleButton discardThemeButton = new InvisibleButton(() -> {
-        App.colorScheme.setCurrentTheme(backupTheme);
+        App.settings.setApp_theme(backupTheme);
         App.activeDialogue = ActiveDialogue.SETTINGS;
     });
 
@@ -344,9 +344,9 @@ public class Scene extends JPanel {
         g2d.setFont(audiowide.deriveFont(45f));
 
         if (!App.alreadyStartedAGame || App.playerWon) {
-            int titleW = g2d.getFontMetrics().stringWidth(App.appTitle);
+            int titleW = g2d.getFontMetrics().stringWidth(App.settings.getApp_name());
             int titleC = ((App.getMetrics().getWindowWidth() - titleW) / 2) - (App.getMetrics().getOffsetX() / 2);
-            g2d.drawString(App.appTitle, titleC, menuY + g2d.getFontMetrics().getHeight() + 45);
+            g2d.drawString(App.settings.getApp_name(), titleC, menuY + g2d.getFontMetrics().getHeight() + 45);
         } else {
             int titleW = g2d.getFontMetrics().stringWidth("Pausado");
             int titleC = ((App.getMetrics().getWindowWidth() - titleW) / 2) - (App.getMetrics().getOffsetX() / 2);
@@ -381,7 +381,7 @@ public class Scene extends JPanel {
             }
 
             if (i == 1) {
-                if (App.playingAgainstAI) {
+                if (App.settings.isPlaying_against_ai()) {
                     ghostButtonStrings[i] = "Contra IA";
                 } else {
                     ghostButtonStrings[i] = "Contra Player";
@@ -601,7 +601,7 @@ public class Scene extends JPanel {
         g.setFont(audiowide.deriveFont(20f));
 
         String ask = "";
-        if (App.playingAgainstAI) {
+        if (App.settings.isPlaying_against_ai()) {
             if (App.player1Won) {
                 ask = "Você ganhou!";
             } else if (App.player2Won) {
@@ -804,7 +804,7 @@ public class Scene extends JPanel {
                         baseHeight, tw, App.getMetrics().getButtonHeight());
             } else if (i == 1) {
                 g.setFont(new Font("Monospace", Font.PLAIN, 20));
-                if (App.forcedCapture) {
+                if (App.settings.isForced_capture()) {
                     g.setColor(App.colorScheme.getMenuButtonsColor_selectedCheckbox());
                     drawHoverButton(g, "\u2713",
                             App.getMetrics().getWindowWidth() - App.getMetrics().getButtonHeight()
@@ -829,7 +829,7 @@ public class Scene extends JPanel {
                         baseHeight, App.getMetrics().getButtonHeight(), App.getMetrics().getButtonHeight());
             } else if (i == 2) {
                 g.setFont(new Font("Monospace", Font.PLAIN, 20));
-                if (App.captureDirectionBoth) {
+                if (App.settings.isBoth_direction_capture()) {
                     g.setColor(App.colorScheme.getMenuButtonsColor_selectedCheckbox());
                     drawHoverButton(g, "\u2713",
                             App.getMetrics().getWindowWidth() - App.getMetrics().getButtonHeight()
@@ -854,7 +854,7 @@ public class Scene extends JPanel {
                         baseHeight, App.getMetrics().getButtonHeight(), App.getMetrics().getButtonHeight());
             } else if (i == 3) {
                 g.setFont(new Font("Monospace", Font.PLAIN, 20));
-                if (App.forcedPromotion) {
+                if (App.settings.isForced_promotion()) {
                     g.setColor(App.colorScheme.getMenuButtonsColor_selectedCheckbox());
                     drawHoverButton(g, "\u2713",
                             App.getMetrics().getWindowWidth() - App.getMetrics().getButtonHeight()

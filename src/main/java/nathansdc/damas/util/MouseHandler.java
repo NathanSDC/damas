@@ -78,7 +78,7 @@ public class MouseHandler implements MouseListener {
         clickY = (int) (Math.ceil((e.getY() - (App.getMetrics().getOffsetY() - App.getMetrics().getOffsetX())) / a)) - 1;
 
         if ((App.isGameActive && !App.playerWon) && !App.boardManager.getBoard().isOutOfBounds(clickX, clickY)
-                && ((App.playingAgainstAI && App.boardManager.currentTurn == 1) || !App.playingAgainstAI)) {
+                && ((App.settings.isPlaying_against_ai() && App.boardManager.currentTurn == 1) || !App.settings.isPlaying_against_ai())) {
             if (!App.boardManager.getBoard().isThereEmpty(clickX, clickY)) {
                 if (!hasSelectedPiece) {
                     App.scene.auxiliarBoard = App.boardManager.showavailableMovements(App.boardManager.getBoard(), clickX, clickY);

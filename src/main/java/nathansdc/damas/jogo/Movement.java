@@ -213,7 +213,7 @@ public class Movement {
                 move.sourceY = sourceY;
 
                 int allowedDirection = (currentTurn == 1) ? -1 : 1;
-                if (!App.captureDirectionBoth) {
+                if (!App.settings.isBoth_direction_capture()) {
                     if (!isKing && dy != allowedDirection) {
                         continue;
                     }
@@ -360,7 +360,7 @@ public class Movement {
             }
         } else {
             int allowedDirection = (App.boardManager.currentTurn == 1) ? -1 : 1;
-            if (!App.captureDirectionBoth) {
+            if (!App.settings.isBoth_direction_capture()) {
                 if (!isKing && dy != allowedDirection) {
                     isValid = false;
                     return;

@@ -123,7 +123,7 @@ public class BoardManager implements ExecutionListener{
             // Se for peça comum, ela só anda na direção permitida para frente (a menos que
             // seja captura, mas no tabuleiro clássico a peça comum só captura para frente)
             int allowedDirection = (currentTurn == 1) ? -1 : 1;
-            if (!App.captureDirectionBoth) {
+            if (!App.settings.isBoth_direction_capture()) {
                 if (!isKing && dy != allowedDirection) {
                     continue;
                 }
