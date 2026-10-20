@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.List;
 
 import main.java.nathansdc.damas.App;
@@ -11,7 +12,7 @@ import main.java.nathansdc.damas.jogo.BoardManager;
 import main.java.nathansdc.damas.jogo.Movement;
 import main.java.nathansdc.damas.ui.InvisibleButton;
 
-public class MouseHandler implements MouseListener {
+public class MouseHandler implements MouseListener, MouseMotionListener {
 
     private Component parent = null;
 
@@ -38,10 +39,10 @@ public class MouseHandler implements MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getButton() == 1) {
-            if((parent!=null) && parent instanceof InvisibleButton){
-                ((InvisibleButton)parent).run();
-            } else {
-                handleSceneClick(e);
+            if ((parent != null) && parent instanceof InvisibleButton) {
+                ((InvisibleButton) parent).run();
+            } else if ((parent != null) && parent instanceof BoardManager) {
+                handleInBoardClick(e);
             }
         }
 
@@ -55,79 +56,98 @@ public class MouseHandler implements MouseListener {
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        if ((parent!=null) && parent instanceof InvisibleButton) {
-            ((InvisibleButton)parent).onHover = true;
-            ((InvisibleButton)parent).setCursor(new Cursor(Cursor.HAND_CURSOR));
+        if ((parent != null) && parent instanceof InvisibleButton) {
+            ((InvisibleButton) parent).onHover = true;
+            ((InvisibleButton) parent).setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
         App.update();
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        if ((parent!=null) && parent instanceof InvisibleButton) {
-            ((InvisibleButton)parent).onHover = false;
-            ((InvisibleButton)parent).setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        if ((parent != null) && parent instanceof InvisibleButton) {
+            ((InvisibleButton) parent).onHover = false;
+            ((InvisibleButton) parent).setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
         App.update();
     }
 
-    private void handleSceneClick(MouseEvent e) {
-        double a = App.getMetrics().getSquareSize() + (App.getMetrics().getOffsetX() / BoardManager.size);
+    private void handleInBoardClick(MouseEvent e) {
+        BoardManager boardManager = (BoardManager) parent;
 
-        clickX = (int) (Math.ceil(e.getX() / a)) - 1;
-        clickY = (int) (Math.ceil((e.getY() - (App.getMetrics().getOffsetY() - App.getMetrics().getOffsetX())) / a)) - 1;
+        clickX = ((int) e.getX() / App.getMetrics().getSquareSize());
+        clickY = ((int) e.getY() / App.getMetrics().getSquareSize());
 
-        if ((App.isGameActive && !App.playerWon) && !App.boardManager.getBoard().isOutOfBounds(clickX, clickY)
-                && ((App.settings.isPlaying_against_ai() && App.boardManager.currentTurn == 1) || !App.settings.isPlaying_against_ai())) {
-            if (!App.boardManager.getBoard().isThereEmpty(clickX, clickY)) {
+        if (boardManager.getBoard().isOutOfBounds(clickX, clickY)) {
+            System.err.println("How long are ur arms to touch this far? " + clickX + "x" + clickY);
+            return;
+        }
+
+        if (!App.isGameActive) {
+            System.err.println("How the heck are u here?");
+            return;
+        }
+
+        if (!App.playerWon && ((App.settings.isPlaying_against_ai() && boardManager.currentTurn == 1)
+                || !App.settings.isPlaying_against_ai())) {
+            if (!boardManager.getBoard().isThereEmpty(clickX, clickY)) {
                 if (!hasSelectedPiece) {
-                    App.scene.auxiliarBoard = App.boardManager.showavailableMovements(App.boardManager.getBoard(), clickX, clickY);
+                    App.scene.auxiliarBoard = App.boardManager.showavailableMovements(App.boardManager.getBoard(),
+                            clickX, clickY);
                     selectedX = clickX;
                     selectedY = clickY;
                     hasSelectedPiece = true;
-                } else {
-                    if (App.scene.auxiliarBoard[clickX][clickY] == 2) {
-                        // Movimento de captura clicando na peça do oponente
-                        Movement m = new Movement(selectedX, selectedY, clickX, clickY, App.boardManager.getBoard());
-                        List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY, App.boardManager.currentTurn);
-                        for (Movement move : moves) {
-                            if (move.equals(m)) {
-                                Movement.execute(move, App.boardManager);
-                                hasSelectedPiece = false;
-                                selectedX = 0;
-                                selectedY = 0;
-                                break;
-                            }
+                } else if (App.scene.auxiliarBoard[clickX][clickY] == 2) {
+                    // Movimento de captura clicando na peça do oponente
+                    Movement m = new Movement(selectedX, selectedY, clickX, clickY, boardManager.getBoard());
+                    List<Movement> moves = Movement.getMovements(boardManager.getBoard(), selectedX, selectedY,
+                            boardManager.currentTurn);
+                    for (Movement move : moves) {
+                        if (move.equals(m)) {
+                            Movement.execute(move, boardManager);
+                            hasSelectedPiece = false;
+                            selectedX = -1;
+                            selectedY = -1;
+                            break;
                         }
-                        App.scene.clearAuxiliarBoard();
-                    } else {
-                        // Quaisquer cliques fora de uma marcada ou na propria peça desativa a seleçao
-                        // atual
-                        hasSelectedPiece = false;
-                        selectedX = 0;
-                        selectedY = 0;
-                        App.scene.clearAuxiliarBoard();
                     }
+                    App.scene.clearAuxiliarBoard();
+                } else {
+                    // Quaisquer cliques fora de uma marcada ou na propria peça desativa a seleçao
+                    // atual
+                    hasSelectedPiece = false;
+                    selectedX = -1;
+                    selectedY = -1;
+                    App.scene.clearAuxiliarBoard();
                 }
             } else {
                 if (hasSelectedPiece) {
                     if (App.scene.auxiliarBoard[clickX][clickY] == 1) {
-                        Movement m = new Movement(selectedX, selectedY, clickX, clickY, App.boardManager.getBoard());
-                        List<Movement> moves = Movement.getMovements(App.boardManager.getBoard(), selectedX, selectedY, App.boardManager.currentTurn);
+                        Movement m = new Movement(selectedX, selectedY, clickX, clickY, boardManager.getBoard());
+                        List<Movement> moves = Movement.getMovements(boardManager.getBoard(), selectedX, selectedY,
+                                boardManager.currentTurn);
                         for (Movement move : moves) {
                             if (move.equals(m)) {
-                                if (Movement.execute(move, App.boardManager)) {
+                                if (Movement.execute(move, boardManager)) {
                                     hasSelectedPiece = false;
                                     selectedX = 0;
                                     selectedY = 0;
                                     App.scene.clearAuxiliarBoard();
                                     break;
-                                }   
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
     }
 }

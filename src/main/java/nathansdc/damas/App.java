@@ -1,6 +1,7 @@
 package main.java.nathansdc.damas;
 
 import java.awt.Desktop;
+import java.awt.Toolkit;
 import java.net.URI;
 import java.util.Random;
 
@@ -87,6 +88,9 @@ public class App implements Runnable {
 
             InterfaceMetrics.getInstance().update();
             scene.update();
+
+            // Obriga o programa a carregar todos os dados antes de imprimi-los na tela
+            Toolkit.getDefaultToolkit().sync();
 
             // Se ativo notifica a IA de que pode fazer sua jogada
             if (settings.isPlaying_against_ai() && boardManager.currentTurn == 2 && !playerWon && !isPlayer2OutOfMoves) {

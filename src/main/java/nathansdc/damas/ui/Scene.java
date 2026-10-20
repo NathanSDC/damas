@@ -11,7 +11,6 @@ import javax.swing.JPanel;
 
 import main.java.nathansdc.damas.App;
 import main.java.nathansdc.damas.jogo.Board;
-import main.java.nathansdc.damas.jogo.BoardManager;
 import main.java.nathansdc.damas.jogo.Movement;
 import main.java.nathansdc.damas.jogo.Piece;
 import main.java.nathansdc.damas.ui.ColorScheme.Theme;
@@ -28,8 +27,6 @@ public class Scene extends JPanel {
         THEME_CHOOSER_DIALOGUE,
         AI_DIFFICULTY_CHOOSER_DIALOGUE
     }
-
-    private static BoardManager startBoard = App.boardManager;
 
     private Font audiowide = FontLoader.getFont("Audiowide").deriveFont(20.0f);
 
@@ -207,6 +204,7 @@ public class Scene extends JPanel {
     public Scene() {
         super();
         clearAuxiliarBoard();
+        add(App.boardManager);
     }
 
     @Override
@@ -218,39 +216,14 @@ public class Scene extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         // Fonte padrão do programa
         g2d.setFont(audiowide);
-
-        // Desenha o fundo
-        for (int i = 0; i < BoardManager.size; i++) {
-            for (int j = 0; j < BoardManager.size; j++) {
-                if (auxiliarBoard[i][j] == 1) { // Pode se mover para >
-                    g.setColor(App.colorScheme.getAuxiliarBoardColor1());
-                } else if (auxiliarBoard[i][j] == 2) { // Peça inimiga marcada como possivel captura
-                    g.setColor(App.colorScheme.getAuxiliarBoardColor2());
-                } else if (auxiliarBoard[i][j] == 3) { // Peça atual selecionada
-                    g.setColor(App.colorScheme.getAuxiliarBoardColor3());
-                } else {
-                    if ((i + j) % 2 == 0) {
-                        g.setColor(App.colorScheme.getBoardColor1());
-                    } else {
-                        g.setColor(App.colorScheme.getBoardColor2());
-                    }
-                }
-                g.fillRect(i * 100, j * 100, 100, 100);
-            }
-        }
-
-        // Desenha as peças no tabuleiro
-        for (int i = 0; i < BoardManager.size; i++) {
-            for (int j = 0; j < BoardManager.size; j++) {
-                drawPieceAt(g2d, i, j, startBoard.getBoard().getPiece(i, j));
-            }
-        }
+        App.boardManager.paint(g2d);
 
         if (!App.isGameActive) {
             // Pinta uma cortina semi-transparente sobre o tabuleiro
             g2d.setColor(new Color(0, 0, 0, 153));
             g.fillRect(0, 0, App.getMetrics().getWindowWidth(), App.getMetrics().getWindowHeight());
             // Reseta as hitboxes de todos os botões
+            App.boardManager.setBounds(App.getMetrics().getBoardX(),0,0,0);
             resetBoundary();
 
             if (App.isMenuActive && App.activeDialogue == ActiveDialogue.MENU) {
@@ -269,6 +242,7 @@ public class Scene extends JPanel {
             }
         } else {
             // Reseta as hitboxes de todos os botões
+            App.boardManager.setBounds(App.getMetrics().getBoardX(), 0, App.getMetrics().getBoardWidth(), App.getMetrics().getBoardHeight());
             resetBoundary();
         }
 
@@ -1167,8 +1141,6 @@ public class Scene extends JPanel {
     }
 
     public void update() {
-        if (App.isGameActive)
-            startBoard = App.boardManager;
         repaint();
     }
 

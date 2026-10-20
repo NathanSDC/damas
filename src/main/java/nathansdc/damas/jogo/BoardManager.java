@@ -1,12 +1,16 @@
 package main.java.nathansdc.damas.jogo;
 
+import java.awt.BasicStroke;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import main.java.nathansdc.damas.App;
 import main.java.nathansdc.damas.util.ExecutionListener;
-
-public class BoardManager implements ExecutionListener{
+import main.java.nathansdc.damas.util.MouseHandler;
+public class BoardManager extends Component implements ExecutionListener {
 
     public static final int size = 8; // Default size
 
@@ -18,19 +22,22 @@ public class BoardManager implements ExecutionListener{
     public Board getBoard() {
         return board;
     }
-    
+
     public int currentTurn = 1; // 1 for Player 1, 2 for Player 2
 
     public BoardManager() {
         // Initialize the boardManager with pieces in their starting positions
         board.populate();
+        addMouseListener(new MouseHandler(this));
+        setBounds(App.getMetrics().getBoardX(), 0, App.getMetrics().getBoardWidth(), App.getMetrics().getBoardHeight());
     }
 
     public BoardManager(Board board) {
         this.board = board;
+        addMouseListener(new MouseHandler(this));
     }
 
-    public boolean restorePreviewState(){
+    public boolean restorePreviewState() {
         // Pega o indice do ultimo jogo salvo
         int index = previewStates.size() - 2;
         // Faz um backup do jogo atual
@@ -69,10 +76,12 @@ public class BoardManager implements ExecutionListener{
 
     /**
      * Retorna uma matriz contendo sinalizadores indicando os tipos de movimentos
-     *  possiveis disponíveis para a peça localizada nas coordenadas ({@code x}, {@code y}).
+     * possiveis disponíveis para a peça localizada nas coordenadas ({@code x},
+     * {@code y}).
      * 
      * <br>
      * <h4>Sinalizadores:</h4>
+     * 
      * <pre>
      *      0 - impossível alcançar
      *      1 - casa livre para a qual pode se mover
@@ -82,10 +91,10 @@ public class BoardManager implements ExecutionListener{
      * 
      * @param x posição {@code x} da peça no tabuleiro
      * @param y posição {@code y} da peça no tabuleiro
-    */
+     */
     public Integer[][] showavailableMovements(Board board, int x, int y) {
         Integer[][] availableMovements = new Integer[size][size];
-        
+
         for (int i = 0; i < availableMovements.length; i++) {
             for (int j = 0; j < availableMovements.length; j++) {
                 availableMovements[i][j] = 0;
@@ -133,15 +142,15 @@ public class BoardManager implements ExecutionListener{
                     int TargetY = y + (2 * dy);
                     int capturedX = x + dx;
                     int capturedY = y + dy;
-    
+
                     Movement m = new Movement(x, y, TargetX, TargetY, capturedX, capturedY, board);
-                    if (m.isValid() && m.isCapture()){
+                    if (m.isValid() && m.isCapture()) {
                         availableMovements[capturedX][capturedY] = 2;
                         availableMovements[TargetX][TargetY] = 1;
                         availableMovements[x][y] = 3;
                     } else {
                         continue;
-                    }    
+                    }
                 }
             }
 
@@ -158,7 +167,7 @@ public class BoardManager implements ExecutionListener{
                         break;
                     }
 
-                    Piece current = board.getPiece(nx,ny);
+                    Piece current = board.getPiece(nx, ny);
 
                     if (!enemyOnWay) {
                         if (current == Piece.EMPTY) {
@@ -169,14 +178,17 @@ public class BoardManager implements ExecutionListener{
                             enemyOnWay = true;
                             enemyX = nx;
                             enemyY = ny;
-                        } else break; // Encontrou peça própria bloqueando a diagonal
+                        } else
+                            break; // Encontrou peça própria bloqueando a diagonal
                     } else {
-                        // Se já encontramos um inimigo, as próximas casas vazias são opções de pouso da captura
+                        // Se já encontramos um inimigo, as próximas casas vazias são opções de pouso da
+                        // captura
                         if (current == Piece.EMPTY) {
                             availableMovements[enemyX][enemyY] = 2;
                             availableMovements[nx][ny] = 1;
                             availableMovements[x][y] = 3;
-                        } else break; // Outra peça (amiga ou inimiga) bloqueando o pouso do salto
+                        } else
+                            break; // Outra peça (amiga ou inimiga) bloqueando o pouso do salto
                     }
                     step++;
                 }
@@ -197,7 +209,8 @@ public class BoardManager implements ExecutionListener{
                 int capturedX = x + dx;
                 int capturedY = y + dy;
 
-                if (!board.isOutOfBounds(captureTargetX, captureTargetY) && board.isThereEmpty(captureTargetX, captureTargetY)) {
+                if (!board.isOutOfBounds(captureTargetX, captureTargetY)
+                        && board.isThereEmpty(captureTargetX, captureTargetY)) {
                     Piece target = board.getPiece(capturedX, capturedY);
                     if (target == enemyPiece || target == enemyKing) {
                         availableMovements[capturedX][capturedY] = 2;
@@ -213,18 +226,20 @@ public class BoardManager implements ExecutionListener{
 
     /**
      * 
-     * Retorna uma lista contendo todos os movimentos disponíveis para o jogador do turno atual
+     * Retorna uma lista contendo todos os movimentos disponíveis para o jogador do
+     * turno atual
      * 
-     * @return {@link java.util.List List}<{@link main.java.nathansdc.damas.jogo.Movement Movement}>
-    */
+     * @return {@link java.util.List
+     *         List}<{@link main.java.nathansdc.damas.jogo.Movement Movement}>
+     */
     public List<Movement> getPlayablePieces() {
         List<Movement> movements = new ArrayList<>();
-        
+
         // Trata da IndexOuOfBoundsException lançada pelo {@code getMovements()}
         try {
-            for (int i = 0; i < Board.SIZE; i++){
+            for (int i = 0; i < Board.SIZE; i++) {
                 for (int j = 0; j < Board.SIZE; j++) {
-                    if (isPieceOf(i, j)){
+                    if (isPieceOf(i, j)) {
                         movements.addAll(Movement.getMovements(board, i, j, currentTurn));
                     }
                 }
@@ -240,10 +255,10 @@ public class BoardManager implements ExecutionListener{
      * Simula o p´róximo estado de um tabuleiro ao excutar determinado movimento
      * 
      * @param tabuleiro
-    */
+     */
     public static Board simuleNextState(Board currentState, Movement movement) {
         if (currentState == null)
-            return  null;
+            return null;
         if (movement == null)
             return currentState;
 
@@ -256,7 +271,8 @@ public class BoardManager implements ExecutionListener{
                     nextState.removePiece(i, j);
                 } else if (i == movement.getTargetX() && j == movement.getTargetY()) {
                     nextState.setPiece(i, j, currentState.getPiece(movement.getSourceX(), movement.getSourceY()));
-                } else if (movement.isCapture() && (i == movement.getCapturedEnemyX() && movement.getCapturedEnemyY() == j)) {
+                } else if (movement.isCapture()
+                        && (i == movement.getCapturedEnemyX() && movement.getCapturedEnemyY() == j)) {
                     nextState.removePiece(i, j);
                 }
             }
@@ -272,4 +288,85 @@ public class BoardManager implements ExecutionListener{
             toggleTurn();
         }
     }
+
+    @Override
+    public void paint(Graphics g) {
+        
+        for (int i = 0; i < BoardManager.size; i++) {
+            for (int j = 0; j < BoardManager.size; j++) {
+                if (App.scene.auxiliarBoard[i][j] == 1) { // Pode se mover para >
+                    g.setColor(App.colorScheme.getAuxiliarBoardColor1());
+                } else if (App.scene.auxiliarBoard[i][j] == 2) { // Peça inimiga marcada como possivel captura
+                    g.setColor(App.colorScheme.getAuxiliarBoardColor2());
+                } else if (App.scene.auxiliarBoard[i][j] == 3) { // Peça atual selecionada
+                    g.setColor(App.colorScheme.getAuxiliarBoardColor3());
+                } else {
+                    if ((i + j) % 2 == 0) {
+                        g.setColor(App.colorScheme.getBoardColor1());
+                    } else {
+                        g.setColor(App.colorScheme.getBoardColor2());
+                    }
+                }
+                g.fillRect(getX() + (i * 100) , getY() + (j * 100), 100, 100);
+            }
+        }
+
+        // Desenha as peças no tabuleiro
+        for (int i = 0; i < BoardManager.size; i++) {
+            for (int j = 0; j < BoardManager.size; j++) {
+                drawPieceAt((Graphics2D)g, i, j, getBoard().getPiece(i, j));
+            }
+        }
+
+    }
+
+      private void drawPieceAt(Graphics2D g, int x, int y, Piece piece) {
+        switch (piece) {
+            case PLAYER1:
+                g.setColor(App.colorScheme.getPlayer1_Color1());
+                g.fillOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+
+                g.setStroke(new BasicStroke(10.0f));
+                g.setColor(App.colorScheme.getPlayer1_Color2());
+                g.drawOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+                break;
+            case PLAYER2:
+                g.setColor(App.colorScheme.getPlayer2_Color1());
+                g.fillOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+
+                g.setStroke(new BasicStroke(10.0f));
+                g.setColor(App.colorScheme.getPlayer2_Color2());
+                g.drawOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+                break;
+            case PLAYER1_KING:
+                g.setColor(App.colorScheme.getPlayer1_Color1());
+                g.fillOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+
+                g.setStroke(new BasicStroke(10.0f));
+                g.setColor(App.colorScheme.getKingsColor());
+                g.drawOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+                break;
+            case PLAYER2_KING:
+                g.setColor(App.colorScheme.getPlayer2_Color1());
+                g.fillOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+
+                g.setStroke(new BasicStroke(10.0f));
+                g.setColor(App.colorScheme.getKingsColor());
+                g.drawOval(getX() + (x * 100) + 10, getY() + (y * 100) + 10, App.getMetrics().getPieceSize(),
+                        App.getMetrics().getPieceSize());
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
 }

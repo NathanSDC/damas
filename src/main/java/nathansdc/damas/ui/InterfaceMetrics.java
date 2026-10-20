@@ -4,19 +4,34 @@ import main.java.nathansdc.damas.jogo.Board;
 
 public class InterfaceMetrics {
 
-    // JANELA ---------------------------------------------------------------------------|
+    // IN GAME MENU ---------------------------------------------------------------------|
+    private int inGameMenuWidth = 75;
+    private int inGameMenuHeight = getWindowHeight();
+    // Esquerda
+    private int inGameMenuXL = 0;
+    // Direita
+    private int inGameMenuXR = getWindowWidth() - inGameMenuWidth;
+
+    // TABULEIRO (1) --------------------------------------------------------------------|
     private int squareSize = 100; // Tamanho das casas do tabuleiro
 
     // PieceSize é uma constante relativa ao valor de SquareSize e possui sempre 80%
     // do valor total do mesmo
     private int pieceSize = (int) (squareSize * 0.8); // Tamanho das peças
 
+    private int boardWidth = (Board.SIZE * squareSize);
+    private int boardHeight = (Board.SIZE * squareSize);
+
+    private int boardX = inGameMenuWidth;
+
+    // JANELA ---------------------------------------------------------------------------|
+    
     private int offsetX = 15;
     // private int offsetXL = 15;
     private int offsetY = 39;
 
-    private int windowWidth = Board.SIZE * squareSize + offsetX; // TAMANHO (LARGURA)
-    private int windowHeight = Board.SIZE * squareSize + offsetY; // TAMANHO (ALTURA)
+    private int windowWidth = boardWidth + offsetX + (inGameMenuWidth*2); // TAMANHO (LARGURA)
+    private int windowHeight = boardHeight + offsetY; // TAMANHO (ALTURA)
 
     // MENU (1) -------------------------------------------------------------------------|
     
@@ -86,8 +101,8 @@ public class InterfaceMetrics {
     */
     public boolean update() {
         pieceSize = (int) (squareSize * 0.8);
-        windowWidth = Board.SIZE * squareSize + offsetX;
-        windowHeight = Board.SIZE * squareSize + offsetY;
+        // windowWidth = (boardWidth) + offsetX + 200;
+        // windowHeight = (boardHeight) + offsetY;
 
         menuX = ((windowWidth - menuWidth) / 2) - (offsetX / 2);
         menuY = ((windowHeight - menuHeight) / 2) - (offsetY / 2);
@@ -257,5 +272,35 @@ public class InterfaceMetrics {
     public int getSettingsButtonX_confirmationRight() {
         return settingsButtonX_confirmationRight;
     }
+
+    public int getBoardWidth() {
+        return boardWidth;
+    }
+
+    public int getBoardHeight() {
+        return boardHeight;
+    }
+
+    public int getInGameMenuWidth() {
+        return inGameMenuWidth;
+    }
+
+    public int getInGameMenuHeight() {
+        return inGameMenuHeight;
+    }
+
+    public int getInGameMenuXL() {
+        return inGameMenuXL;
+    }
+
+    public int getInGameMenuXR() {
+        return inGameMenuXR;
+    }
+
+    public int getBoardX() {
+        return boardX;
+    }
+
     
+
 }
